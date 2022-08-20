@@ -21,7 +21,7 @@ export default function WalletConnect() {
   let [checkinNFTClaimed, setCheckinNFTClaimed] = useState(0);
   let [cheerNFTClaimed, setCheerNFTClaimed] = useState(0);
 
-  const { address, connectToWallet, disconnectWallet, provider } = useContext(WalletContext);
+  const { address, balance, connectToWallet, disconnectWallet, provider } = useContext(WalletContext);
 
   useEffect(() => {
     // will cause a lot of RPC error for non-exist tokens (expected)
@@ -92,26 +92,10 @@ export default function WalletConnect() {
                         </div>
                         <div className="flex items-center justify-between gap-3">
                           <span className="text-sm font-medium -tracking-tighter text-gray-600 dark:text-gray-400">
-                            Coin
+                            LYX
                           </span>
                           <span className="rounded-lg px-2 py-1 text-sm tracking-tighter">
-                            {coin}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="text-sm font-medium -tracking-tighter text-gray-600 dark:text-gray-400">
-                            Special NFT
-                          </span>
-                          <span className="rounded-lg px-2 py-1 text-sm tracking-tighter">
-                            {specialNFTNumber}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="text-sm font-medium -tracking-tighter text-gray-600 dark:text-gray-400">
-                            Milestone NFT
-                          </span>
-                          <span className="rounded-lg px-2 py-1 text-sm tracking-tighter">
-                            {milestoneNFTNumber + checkinNFTClaimed + cheerNFTClaimed}
+                            {balance}
                           </span>
                         </div>
                       </div>

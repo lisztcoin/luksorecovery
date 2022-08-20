@@ -1,6 +1,5 @@
 import { useEffect, useState, createContext, ReactNode } from 'react';
-// import Web3Modal from 'web3modal';
-import Web3Modal from '@0xsequence/web3modal'
+import Web3Modal from 'web3modal';
 import { ethers } from 'ethers';
 import { sequence } from '0xsequence'
 import WalletConnect from '@walletconnect/web3-provider'
@@ -10,12 +9,6 @@ const web3modalStorageKey = 'WEB3_CONNECT_CACHED_PROVIDER';
 export const WalletContext = createContext<any>({});
 
 let providerOptions: any = {
-  walletconnect: {
-    package: WalletConnect,
-    options: {
-      infuraId: 'xxx-your-infura-id-here'
-    }
-  }
 }
 
 const web3Modal = typeof window !== 'undefined' && new Web3Modal({
@@ -32,7 +25,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (web3Modal && web3Modal.cachedProvider) {
-      connectToWalletInternal()
+      connectToWalletInternal();
     }
   }, [web3Modal])
 
@@ -84,13 +77,11 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       setLoading(true);
       // checkIfExtensionIsAvailable();
       const wallet = web3Modal && await web3Modal.connect();
-      const provider = new ethers.providers.Web3Provider(wallet)
-      if (wallet.sequence) {
-        ; (provider as any).sequence = wallet.sequence
-      }
+      const provider = new ethers.providers.Web3Provider(wallet);
       await subscribeProvider(wallet);
       setProvider(provider);
       setWalletAddress(provider);
+      console.log("wallet: ", wallet);
       setLoading(false);
     } catch (error) {
       setLoading(false);
