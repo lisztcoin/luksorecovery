@@ -14,53 +14,8 @@ import SPECIAL_ABI from '@/abis/special.json'
 import { Contract, utils, BigNumber } from "ethers";
 
 export default function WalletConnect() {
-  const { openModal } = useModal();
-  let [coin, setCoin] = useState("");
-  let [specialNFTNumber, setSpecialNFTNumber] = useState(0);
-  let [milestoneNFTNumber, setMilestoneNFTNumber] = useState(0);
-  let [checkinNFTClaimed, setCheckinNFTClaimed] = useState(0);
-  let [cheerNFTClaimed, setCheerNFTClaimed] = useState(0);
 
   const { address, balance, connectToWallet, disconnectWallet, provider } = useContext(WalletContext);
-
-  useEffect(() => {
-    // will cause a lot of RPC error for non-exist tokens (expected)
-    // not sure whether it's bad for perforamce.
-    if (!!address && !!provider) {
-      const goal_contract = new Contract(GOAL_CONTRACT, GOAL_ABI, provider.getSigner(address));
-      goal_contract.coins(address).then(
-        (count: any) => {
-          setCoin(utils.formatUnits(count, 0));
-        }
-      );
-      const special_contract = new Contract(SPECIAL_CONTRACT, SPECIAL_ABI, provider.getSigner(address));
-      special_contract.getAllSpecialokensFromAddress(address).then(
-        (result: any[]) => {
-          setSpecialNFTNumber(result.length);
-        }
-      );
-
-      const milestone_contract = new Contract(MILESTONE_CONTRACT, MILESTONE_ABI, provider.getSigner(address));
-      milestone_contract.getAllGoalTokensFromAddress(address).then(
-        (result: any[]) => {
-          setMilestoneNFTNumber(result.length);
-        }
-      );
-
-      milestone_contract.checkinNFTClaimed(address).then(
-        (result: BigNumber) => {
-          setCheckinNFTClaimed(parseInt(utils.formatUnits(result, 0)));
-        }
-      )
-
-      milestone_contract.cheersNFTClaimed(address).then(
-        (result: BigNumber) => {
-          setCheerNFTClaimed(parseInt(utils.formatUnits(result, 0)));
-        }
-      )
-    }
-  }, [address, provider])
-
   return (
     <>
       {address ? (

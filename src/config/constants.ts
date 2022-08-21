@@ -50,7 +50,7 @@ export const NETWORKS: { [K in NetworkType]: NetworkInfo } = {
     },
 }
 
-export const PRIVATE_KEY =
-    '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+export const GUARDIAN_CONTRACT =
+    '0xfd8Cb2697F87A0669a33866CC3f3F1146867A1E7'
 
 export const DEFAULT_NETWORK_CONFIG = NETWORKS[DEFAULT_NETWORK]
