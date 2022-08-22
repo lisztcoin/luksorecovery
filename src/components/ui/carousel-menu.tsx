@@ -40,7 +40,7 @@ function SetupRecoveryNavLink({ title, isActive, className }: any) {
 
 type CarouselMenuProps = {
   carouselMenu: any[];
-  children: React.ReactChild[];
+  children: boolean | React.ReactChild | React.ReactChild[];
 };
 
 export default function CarouselMenu({ carouselMenu, children }: CarouselMenuProps) {
