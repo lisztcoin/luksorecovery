@@ -28,6 +28,11 @@ export const menuItems = [
     href: routes.home,
   },
   {
+    name: 'Setup Recovery',
+    icon: <ProfileIcon />,
+    href: routes.setupRecovery,
+  },
+  {
     name: 'My Goals',
     icon: <FarmIcon />,
     href: routes.mygoals,

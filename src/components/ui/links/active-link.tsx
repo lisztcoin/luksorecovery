@@ -5,16 +5,17 @@ import AnchorLink from '@/components/ui/links/anchor-link';
 
 interface ActiveLinkProps extends LinkProps {
   activeClassName?: string;
+  isActive?: boolean;
 }
 const ActiveLink: React.FC<
   ActiveLinkProps & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>
-> = ({ href, className, activeClassName = 'active', ...props }) => {
+> = ({ href, className, activeClassName = 'active', isActive, ...props }) => {
   const { pathname } = useRouter();
   return (
     <AnchorLink
       href={href}
       className={cn(className, {
-        [activeClassName]: pathname === href,
+        [activeClassName]: pathname === href || isActive,
       })}
       {...props}
     />

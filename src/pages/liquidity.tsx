@@ -7,15 +7,32 @@ import TransactionInfo from '@/components/ui/transaction-info';
 import { Plus } from '@/components/icons/plus';
 import ActiveLink from '@/components/ui/links/active-link';
 import Trade from '@/components/ui/trade';
+import CarouselMenu from '@/components/ui/carousel-menu';
+import routes from '@/config/routes';
+
+const tradeMenu = [
+  {
+    name: 'Swap',
+    value: routes.swap,
+  },
+  {
+    name: 'Liquidity',
+    value: routes.liquidity,
+  },
+  {
+    name: 'Vote',
+    value: routes.vote,
+  },
+  {
+    name: 'AJFIOE',
+    value: routes.vote,
+  },
+];
 
 const LiquidityPage: NextPageWithLayout = () => {
   return (
     <>
-      <NextSeo
-        title="Liquidity"
-        description="Criptic - React Next Web3 NFT Crypto Dashboard Template"
-      />
-      <Trade>
+      <CarouselMenu carouselMenu={tradeMenu}>
         <div className="mb-5 border-b border-dashed border-gray-200 pb-5 dark:border-gray-800 xs:mb-7 xs:pb-6">
           <div className="relative flex flex-col gap-3">
             <CoinInput
@@ -71,7 +88,7 @@ const LiquidityPage: NextPageWithLayout = () => {
             </Button>
           </ActiveLink>
         </div>
-      </Trade>
+      </CarouselMenu>
     </>
   );
 };
