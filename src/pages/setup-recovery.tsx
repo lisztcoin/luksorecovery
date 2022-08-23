@@ -14,6 +14,8 @@ import { Contract, BigNumber, utils } from 'ethers';
 import { GUARDIAN_CONTRACT } from '@/config/constants';
 import LSP11ABI from '@/abis/LSP11BasicSocialRecovery.json'
 import CarouselMenu from '@/components/ui/carousel-menu';
+import { setupRecoveryAtom } from '@/store/store';
+import { useAtom } from 'jotai';
 
 const setupRecoveryMenu = [
   {
@@ -231,27 +233,24 @@ const SecretPage = () => {
 
 const SetupRecoveryPage: NextPageWithLayout = () => {
   const { address, connectToWallet, disconnectWallet, provider } = useContext(WalletContext);
-  let [step, setStep] = useState(3);
-  let [unlockedStep, setUnlockedStep] = useState(3);
-  let [toggleCoin, setToggleCoin] = useState(false);
-  let [threshold, setThreshold] = useState(-1);
+  const [state, setState] = useAtom(setupRecoveryAtom);
 
   useEffect(() => {
-    for (let i = 0; i <= unlockedStep; i++) {
+    console.log("state: ", state);
+    for (let i = 0; i <= state.unlockedStep; i++) {
       setupRecoveryMenu[i].visibility = true;
       setupRecoveryMenu[i].selected = false;
     }
-    setupRecoveryMenu[step].selected = true;
-  }, [step, unlockedStep])
-
+    setupRecoveryMenu[state.step].selected = true;
+  }, [state])
 
   return (
     <>
       <CarouselMenu carouselMenu={setupRecoveryMenu}>
-        {(step == 0 && (<InitializePage />)) ||
-          (step == 1 && (<AddGuardianPage />)) ||
-          (step == 2 && (<SetThresholdPage />)) ||
-          (step == 3 && (<SecretPage />))}
+        {(state.step == 0 && (<InitializePage />)) ||
+          (state.step == 1 && (<AddGuardianPage />)) ||
+          (state.step == 2 && (<SetThresholdPage />)) ||
+          (state.step == 3 && (<SecretPage />))}
       </CarouselMenu>
     </>
   );

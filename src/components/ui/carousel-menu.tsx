@@ -13,19 +13,25 @@ import { ExportIcon } from '@/components/icons/export-icon';
 import { useBreakpoint } from '@/lib/hooks/use-breakpoint';
 import { useIsMounted } from '@/lib/hooks/use-is-mounted';
 import { fadeInBottom } from '@/lib/framer-motion/fade-in-bottom';
+import { useAtom } from 'jotai';
+import { setupRecoveryAtom } from '@/store/store';
+import CarouselActiveLink from './links/carousel-active-link';
 // dynamic import
 const Listbox = dynamic(() => import('@/components/ui/list-box'));
 
-function SetupRecoveryNavLink({ title, isActive, className }: any) {
+function SetupRecoveryNavLink({ index, title, isActive, className }: any) {
+  const [state, setState] = useAtom(setupRecoveryAtom);
+  console.log('isActive: ', isActive, ';index: ', index)
   return (
-    <ActiveLink
-      href=''
+    <CarouselActiveLink
+      href='/setup-recovery'
       className={cn(
         'relative z-[1] inline-flex items-center py-1.5 px-3',
         className
       )}
       activeClassName="font-medium text-white"
       isActive={isActive}
+      onClick={() => { setState({ ...state, step: index }) }}
     >
       <span>{title}</span>
       {isActive && (
@@ -34,7 +40,7 @@ function SetupRecoveryNavLink({ title, isActive, className }: any) {
           layoutId="activeNavLinkIndicator"
         />
       )}
-    </ActiveLink>
+    </CarouselActiveLink>
   );
 }
 
@@ -72,11 +78,12 @@ export default function CarouselMenu({ carouselMenu, children }: CarouselMenuPro
             </Listbox>
           )}
           <div className="hidden items-center justify-between text-gray-600 dark:text-gray-400 sm:flex">
-            {carouselMenu.map((item) => item.visibility && (
+            {carouselMenu.map((item, index) => item.visibility && (
               <SetupRecoveryNavLink
                 key={item.name}
                 title={item.name}
                 isActive={item.selected}
+                index={index}
               />
             ))}
           </div>

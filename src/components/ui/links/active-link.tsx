@@ -9,13 +9,13 @@ interface ActiveLinkProps extends LinkProps {
 }
 const ActiveLink: React.FC<
   ActiveLinkProps & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>
-> = ({ href, className, activeClassName = 'active', isActive, ...props }) => {
+> = ({ href, className, activeClassName = 'active', ...props }) => {
   const { pathname } = useRouter();
   return (
     <AnchorLink
       href={href}
       className={cn(className, {
-        [activeClassName]: pathname === href || isActive,
+        [activeClassName]: pathname === href,
       })}
       {...props}
     />
