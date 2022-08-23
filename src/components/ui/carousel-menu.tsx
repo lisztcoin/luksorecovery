@@ -14,7 +14,7 @@ import { useBreakpoint } from '@/lib/hooks/use-breakpoint';
 import { useIsMounted } from '@/lib/hooks/use-is-mounted';
 import { fadeInBottom } from '@/lib/framer-motion/fade-in-bottom';
 import { useAtom } from 'jotai';
-import { setupRecoveryAtom, voteAtom } from '@/store/store';
+import { setupRecoveryAtom, voteAtom, recoverAtom } from '@/store/store';
 import CarouselActiveLink from './links/carousel-active-link';
 // dynamic import
 const Listbox = dynamic(() => import('@/components/ui/list-box'));
@@ -22,6 +22,8 @@ const Listbox = dynamic(() => import('@/components/ui/list-box'));
 function CarouselMenuNavLink({ index, title, isActive, className, path }: any) {
   const [setupRecoveryState, setSetupRecoveryState] = useAtom(setupRecoveryAtom);
   const [voteState, setVoteState] = useAtom(voteAtom);
+  const [recoverState, setRecoverState] = useAtom(recoverAtom);
+
   console.log('isActive: ', isActive, ';index: ', index)
   return (
     <CarouselActiveLink
@@ -34,9 +36,11 @@ function CarouselMenuNavLink({ index, title, isActive, className, path }: any) {
       isActive={isActive}
       onClick={() => {
         if (path == '/setup-recovery') {
-          setSetupRecoveryState({ ...setupRecoveryState, step: index })
+          setSetupRecoveryState({ ...setupRecoveryState, step: index });
         } else if (path == '/guardian-vote') {
-          setVoteState({ ...voteState, step: index })
+          setVoteState({ ...voteState, step: index });
+        } else if (path == '/recover-account') {
+          setRecoverState({ ...recoverState, step: index });
         }
       }}
     >

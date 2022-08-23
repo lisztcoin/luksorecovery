@@ -2,6 +2,7 @@ const routes = {
   home: '/',
   setupRecovery: '/setup-recovery',
   guardianVote: '/guardian-vote',
+  recoverAccount: '/recover-account',
   supportOthers: '/support-others',
   liquidity: '/liquidity',
   liquidityPosition: '/liquidity-position',

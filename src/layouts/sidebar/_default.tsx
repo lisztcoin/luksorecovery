@@ -38,6 +38,11 @@ export const menuItems = [
     href: routes.guardianVote,
   },
   {
+    name: 'Recover Account',
+    icon: <ProfileIcon />,
+    href: routes.recoverAccount,
+  },
+  {
     name: 'My Goals',
     icon: <FarmIcon />,
     href: routes.mygoals,

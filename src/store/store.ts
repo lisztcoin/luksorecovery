@@ -12,3 +12,9 @@ export const voteAtom = atom({
     unlockedStep: 2,
     account: "",
 });
+
+export const recoverAtom = atom({
+    step: 0,
+    unlockedStep: 1,
+    account: "",
+});
