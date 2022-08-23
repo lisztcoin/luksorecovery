@@ -14,24 +14,31 @@ import { useBreakpoint } from '@/lib/hooks/use-breakpoint';
 import { useIsMounted } from '@/lib/hooks/use-is-mounted';
 import { fadeInBottom } from '@/lib/framer-motion/fade-in-bottom';
 import { useAtom } from 'jotai';
-import { setupRecoveryAtom } from '@/store/store';
+import { setupRecoveryAtom, voteAtom } from '@/store/store';
 import CarouselActiveLink from './links/carousel-active-link';
 // dynamic import
 const Listbox = dynamic(() => import('@/components/ui/list-box'));
 
-function SetupRecoveryNavLink({ index, title, isActive, className }: any) {
-  const [state, setState] = useAtom(setupRecoveryAtom);
+function CarouselMenuNavLink({ index, title, isActive, className, path }: any) {
+  const [setupRecoveryState, setSetupRecoveryState] = useAtom(setupRecoveryAtom);
+  const [voteState, setVoteState] = useAtom(voteAtom);
   console.log('isActive: ', isActive, ';index: ', index)
   return (
     <CarouselActiveLink
-      href='/setup-recovery'
+      href={path}
       className={cn(
         'relative z-[1] inline-flex items-center py-1.5 px-3',
         className
       )}
       activeClassName="font-medium text-white"
       isActive={isActive}
-      onClick={() => { setState({ ...state, step: index }) }}
+      onClick={() => {
+        if (path == '/setup-recovery') {
+          setSetupRecoveryState({ ...setupRecoveryState, step: index })
+        } else if (path == '/guardian-vote') {
+          setVoteState({ ...voteState, step: index })
+        }
+      }}
     >
       <span>{title}</span>
       {isActive && (
@@ -79,11 +86,12 @@ export default function CarouselMenu({ carouselMenu, children }: CarouselMenuPro
           )}
           <div className="hidden items-center justify-between text-gray-600 dark:text-gray-400 sm:flex">
             {carouselMenu.map((item, index) => item.visibility && (
-              <SetupRecoveryNavLink
+              <CarouselMenuNavLink
                 key={item.name}
                 title={item.name}
                 isActive={item.selected}
                 index={index}
+                path={item.path}
               />
             ))}
           </div>

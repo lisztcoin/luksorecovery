@@ -33,6 +33,11 @@ export const menuItems = [
     href: routes.setupRecovery,
   },
   {
+    name: 'Guardian Vote',
+    icon: <ProfileIcon />,
+    href: routes.guardianVote,
+  },
+  {
     name: 'My Goals',
     icon: <FarmIcon />,
     href: routes.mygoals,

@@ -22,21 +22,25 @@ const setupRecoveryMenu = [
     name: 'Initialize',
     visibility: true,
     selected: true,
+    path: '/setup-recovery',
   },
   {
     name: 'Guardians',
     visibility: false,
     selected: false,
+    path: '/setup-recovery',
   },
   {
     name: 'Threshold',
     visibility: false,
     selected: false,
+    path: '/setup-recovery',
   },
   {
     name: 'Secret',
     visibility: false,
     selected: false,
+    path: '/setup-recovery',
   }
 ];
 

@@ -6,3 +6,9 @@ export const setupRecoveryAtom = atom({
     step: 0,
     unlockedStep: 3,
 });
+
+export const voteAtom = atom({
+    step: 0,
+    unlockedStep: 2,
+    account: "",
+});

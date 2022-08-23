@@ -1,6 +1,7 @@
 const routes = {
   home: '/',
   setupRecovery: '/setup-recovery',
+  guardianVote: '/guardian-vote',
   supportOthers: '/support-others',
   liquidity: '/liquidity',
   liquidityPosition: '/liquidity-position',
