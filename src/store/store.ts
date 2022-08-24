@@ -4,7 +4,7 @@ import { atom } from "jotai";
 
 export const setupRecoveryAtom = atom({
     step: 0,
-    unlockedStep: 3,
+    unlockedStep: 0,
 });
 
 export const voteAtom = atom({

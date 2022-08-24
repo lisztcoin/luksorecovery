@@ -62,7 +62,6 @@ const RecoverPage = () => {
   )
 }
 
-
 const RecoverAccountPage: NextPageWithLayout = () => {
   const { address, connectToWallet, disconnectWallet, provider } = useContext(WalletContext);
   const [state, setState] = useAtom(recoverAtom);

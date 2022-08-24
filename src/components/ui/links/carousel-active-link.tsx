@@ -7,7 +7,7 @@ interface ActiveLinkProps extends LinkProps {
     activeClassName?: string;
     isActive?: boolean;
 }
-const ActiveLink: React.FC<
+const CarouselActiveLink: React.FC<
     ActiveLinkProps & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>
 > = ({ href, className, activeClassName = 'active', isActive, ...props }) => {
     const { pathname } = useRouter();
@@ -22,4 +22,4 @@ const ActiveLink: React.FC<
     );
 };
 
-export default ActiveLink;
+export default CarouselActiveLink;

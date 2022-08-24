@@ -24,7 +24,6 @@ function CarouselMenuNavLink({ index, title, isActive, className, path }: any) {
   const [voteState, setVoteState] = useAtom(voteAtom);
   const [recoverState, setRecoverState] = useAtom(recoverAtom);
 
-  console.log('isActive: ', isActive, ';index: ', index)
   return (
     <CarouselActiveLink
       href={path}
@@ -73,7 +72,7 @@ export default function CarouselMenu({ carouselMenu, children }: CarouselMenuPro
   }
   useEffect(() => {
     setSelectedMenuItem(carouselMenu[currentPath]);
-  }, [currentPath]);
+  }, [currentPath, carouselMenu]);
   return (
     <div className="pt-8 text-sm xl:pt-10">
       <div className="mx-auto w-full max-w-lg rounded-lg bg-white p-5 pt-4 shadow-card dark:bg-light-dark xs:p-6 xs:pt-5">
