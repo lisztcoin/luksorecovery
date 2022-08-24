@@ -16,6 +16,7 @@ import LSP11ABI from '@/abis/LSP11BasicSocialRecovery.json'
 import CarouselMenu from '@/components/ui/carousel-menu';
 import { setupRecoveryAtom } from '@/store/store';
 import { useAtom } from 'jotai';
+import HashLoader from 'react-spinners/HashLoader'
 
 let setupRecoveryMenu = [
   {
@@ -91,7 +92,9 @@ const SetThresholdPage = () => {
     }
   });
 
-  const setThreshold = () => {
+  const [loading, setLoading] = useState(false);
+
+  const setThreshold = async () => {
     if (!!address && !!provider) {
       const goal_contract = new Contract(GUARDIAN_CONTRACT, LSP11ABI, provider.getSigner(address));
       let thresholdInput = document.getElementById("thresholdInput");
@@ -99,21 +102,17 @@ const SetThresholdPage = () => {
       if (thresholdInput != null) {
         threshold = (thresholdInput as HTMLInputElement).value;
       }
-      goal_contract.setThreshold(parseInt(threshold)).then(
-        () => {
-        }
-      ).catch(
-        (reason: any) => {
-          console.log("reason:", reason.message);
-        }
-      );
+      setLoading(true);
+      let tx = await goal_contract.setThreshold(parseInt(threshold));
+      let receipt = await tx.wait();
     }
   }
 
   const [state, setState] = useAtom(setupRecoveryAtom);
 
-  const handleSetThreshold = () => {
-    setThreshold();
+  const handleSetThreshold = async () => {
+    await setThreshold();
+    setLoading(false);
     const newStep = state.step + 1;
     setState({ ...state, step: newStep, unlockedStep: state.unlockedStep < newStep ? newStep : state.unlockedStep })
   }
@@ -134,6 +133,11 @@ const SetThresholdPage = () => {
           autoComplete="off"
           id="thresholdInput"
         />
+        {loading && (
+          <div className='flex justify-center'>
+            <HashLoader />
+          </div>
+        )}
         <Button
           size="large"
           shape="rounded"
