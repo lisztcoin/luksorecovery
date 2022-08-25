@@ -9,8 +9,9 @@ export const setupRecoveryAtom = atom({
 
 export const voteAtom = atom({
     step: 0,
-    unlockedStep: 2,
+    unlockedStep: 0,
     account: "",
+    processName: "",
 });
 
 export const recoverAtom = atom({
