@@ -43,19 +43,26 @@ const guardianVoteMenu = [
 const AccountPage = () => {
   const { address, connectToWallet, disconnectWallet, provider } = useContext(WalletContext);
   const [state, setState] = useAtom(voteAtom);
+
+  const isGuardian = async () => {
+    const goal_contract = new Contract(GUARDIAN_CONTRACT, LSP11ABI, provider.getSigner(address));
+    const result = await goal_contract.isGuardian(address)
+    return result;
+  }
+
   const handleSetAccount = async () => {
     if (!!address && !!provider) {
-      const goal_contract = new Contract(GUARDIAN_CONTRACT, LSP11ABI, provider.getSigner(address));
       let accountInput = document.getElementById("accountInput");
       let account = ""
       if (accountInput != null) {
         account = (accountInput as HTMLInputElement).value;
       }
-      // Check whether this account has LSP11 attached and whether you are a guardian.
-      // let tx = await goal_contract.setThreshold(parseInt(threshold));
-      // let receipt = await tx.wait();
-      const newStep = state.step + 1;
-      setState({ ...state, account: account, step: newStep, unlockedStep: state.unlockedStep < newStep ? newStep : state.unlockedStep });
+      // Check whether this account has LSP11 attached
+      const validGuardian = await isGuardian();
+      if (validGuardian) {
+        const newStep = state.step + 1;
+        setState({ ...state, account: account, step: newStep, unlockedStep: state.unlockedStep < newStep ? newStep : state.unlockedStep });
+      }
     }
   }
 
@@ -197,6 +204,11 @@ const VotePage = () => {
           autoComplete="off"
           id="newOwnerInput"
         />
+        {loading && (
+          <div className='flex justify-center'>
+            <HashLoader />
+          </div>
+        )}
         <Button
           size="large"
           shape="rounded"
