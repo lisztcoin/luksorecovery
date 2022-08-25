@@ -166,6 +166,7 @@ const SetThresholdPage = () => {
 const AddGuardianPage = () => {
   const { address, connectToWallet, disconnectWallet, provider } = useContext(WalletContext);
   const [guardianCount, setGuardianCount] = useState(0);
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     if (!!address && !!provider) {
       const goal_contract = new Contract(GUARDIAN_CONTRACT, LSP11ABI, provider.getSigner(address));
@@ -183,7 +184,7 @@ const AddGuardianPage = () => {
     }
   });
 
-  const addGuardians = () => {
+  const addGuardians = async () => {
     if (!!address && !!provider) {
       const goal_contract = new Contract(GUARDIAN_CONTRACT, LSP11ABI, provider.getSigner(address));
       let guardianInput = document.getElementById("guardianInput");
@@ -191,15 +192,9 @@ const AddGuardianPage = () => {
       if (guardianInput != null) {
         guardianAddress = (guardianInput as HTMLInputElement).value;
       }
-      console.log("guardian addr: ", guardianAddress)
-      goal_contract.addGuardian(guardianAddress).then(
-        () => {
-        }
-      ).catch(
-        (reason: any) => {
-          console.log("reason:", reason.message);
-        }
-      );
+      setLoading(true);
+      let tx = await goal_contract.addGuardian(guardianAddress);
+      let receipt = await tx.wait();
     }
   }
 
@@ -211,7 +206,6 @@ const AddGuardianPage = () => {
       if (guardianInput != null) {
         guardianAddress = (guardianInput as HTMLInputElement).value;
       }
-      console.log("guardian addr: ", guardianAddress)
       goal_contract.removeGuardian(guardianAddress).then(
         () => {
         }
@@ -224,9 +218,10 @@ const AddGuardianPage = () => {
   }
 
   const [state, setState] = useAtom(setupRecoveryAtom);
-  const handleAddGuardian = () => {
+  const handleAddGuardian = async () => {
     //0x37684639E96D85853BC1D8813a86252F79EfccE6
-    addGuardians();
+    await addGuardians();
+    setLoading(false);
     const newStep = state.step + 1;
     setState({ ...state, step: newStep, unlockedStep: state.unlockedStep < newStep ? newStep : state.unlockedStep })
   }
