@@ -117,7 +117,7 @@ const NamePage = () => {
       const goal_contract = new Contract(GUARDIAN_CONTRACT, LSP11ABI, provider.getSigner(address));
       goal_contract.getRecoverProcessesIds().then(
         (result: any[]) => {
-          console.log("here", result);
+          console.log('weird, ', result);
           setProcess(result);
         }
       );
@@ -127,10 +127,13 @@ const NamePage = () => {
   return (
     <>
       <div className="flex flex-col gap-4 xs:gap-[18px]">
-        <p>Select a row to vote on existing process, or enter process name to create a new voting process. </p>
-        {process.map((item) => (
+        <p>Enter an existing process to join, or enter a new process name to create a new voting process. </p>
+        <p>Existing Processes: </p>
+        {process.map((item, index) => (
           <ProcessInfo
-            label={item}
+            label={utils.parseBytes32String(item)}
+            key={index}
+            value={true}
           />
         ))}
         <input

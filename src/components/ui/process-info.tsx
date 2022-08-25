@@ -1,7 +1,7 @@
 import cn from 'classnames';
 interface ProcessInfoTypes {
   label: string;
-  value?: string | number;
+  value?: boolean;
   className?: string;
 }
 
@@ -17,8 +17,8 @@ export default function ProcessInfo({
         className
       )}
     >
-      <span className="font-medium">{label}</span>
-      <span>SELECT</span>
+      <span className="font-medium"> ==> {label}</span>
+      {/* <span>{value ? "SELECT" : "Command"}</span> */}
     </div>
   );
 }
