@@ -16,6 +16,10 @@ export const voteAtom = atom({
 
 export const recoverAtom = atom({
     step: 0,
-    unlockedStep: 1,
+    unlockedStep: 0,
     account: "",
 });
+
+export const profileLSP11ContractAtom = atom({
+    address: ""
+})

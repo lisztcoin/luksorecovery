@@ -16,6 +16,7 @@ import LSP11ABI from '@/abis/LSP11BasicSocialRecovery.json'
 import CarouselMenu from '@/components/ui/carousel-menu';
 import { recoverAtom } from '@/store/store';
 import { useAtom } from 'jotai';
+import { HashLoader } from 'react-spinners';
 
 const recoverAccountMenu = [
   {
@@ -23,40 +24,87 @@ const recoverAccountMenu = [
     visibility: true,
     selected: true,
     path: '/recover-account',
-  },
-  {
-    name: 'Recover',
-    visibility: false,
-    selected: false,
-    path: '/recover-account',
   }
 ];
 
 const AccountPage = () => {
-  return (
-    <>
-      <div className="flex flex-col gap-4 xs:gap-[18px]">
-        <TransactionInfo label={'Min. Received'} />
-        <TransactionInfo label={'Rate'} />
-        <TransactionInfo label={'Offered by'} />
-        <TransactionInfo label={'Price Slippage'} value={'1%'} />
-        <TransactionInfo label={'Network Fee'} />
-        <TransactionInfo label={'Criptic Fee'} />
-      </div>
-    </>
-  )
-}
+  const { address, connectToWallet, disconnectWallet, provider } = useContext(WalletContext);
+  const [loading, setLoading] = useState(false);
+  const [accountRecover, setAccountRecover] = useState("");
 
-const RecoverPage = () => {
+  const recover = async () => {
+    if (!!address && !!provider) {
+      const goal_contract = new Contract(GUARDIAN_CONTRACT, LSP11ABI, provider.getSigner(address));
+      let newHashInput = document.getElementById("newHashInput");
+      let newHash = ""
+      if (newHashInput != null) {
+        newHash = (newHashInput as HTMLInputElement).value;
+      }
+      let recoveryProcessInput = document.getElementById("recoveryProcessInput");
+      let recoveryProcess = ""
+      if (recoveryProcessInput != null) {
+        recoveryProcess = (recoveryProcessInput as HTMLInputElement).value;
+      }
+      let secretInput = document.getElementById("secretInput");
+      let secret = ""
+      if (secretInput != null) {
+        secret = (secretInput as HTMLInputElement).value;
+      }
+      setLoading(true);
+      console.log('aaaa')
+      console.log(newHash);
+      // console.log(utils.formatBytes32String(recoveryProcess));
+      // console.log(secret);
+      // console.log(account)
+      // let tx = await goal_contract.recoverOwnership(utils.formatBytes32String(recoveryProcess), secret, newHash);
+      let tx = await goal_contract.recoverOwnership(utils.formatBytes32String(recoveryProcess), secret, newHash);
+      let receipt = await tx.wait();
+    }
+  }
+
+  const handleRecover = async () => {
+    await recover();
+    setLoading(false);
+  }
+
   return (
     <>
       <div className="flex flex-col gap-4 xs:gap-[18px]">
-        <TransactionInfo label={'Min. Received'} />
-        <TransactionInfo label={'Rate'} />
-        <TransactionInfo label={'Offered by'} />
-        <TransactionInfo label={'Price Slippage'} value={'1%'} />
-        <TransactionInfo label={'Network Fee'} />
-        <TransactionInfo label={'Criptic Fee'} />
+        <p>Please enter the recovery process id: </p>
+        <input
+          className="h-12 w-full appearance-none rounded-full border-2 border-gray-200 py-1 text-sm tracking-tighter text-gray-900 outline-none transition-all placeholder:text-gray-600 focus:border-gray-900 ltr:pr-5 ltr:pl-11 rtl:pl-5 rtl:pr-11 dark:border-gray-600 dark:bg-light-dark dark:text-white dark:placeholder:text-gray-500 dark:focus:border-gray-500 sm:ltr:pl-14 sm:rtl:pr-14 xl:ltr:pl-16 xl:rtl:pr-16"
+          placeholder="a word"
+          autoComplete="off"
+          id="recoveryProcessInput"
+        />
+        <p>Please enter the secret word you used when setting up recovery: </p>
+        <input
+          className="h-12 w-full appearance-none rounded-full border-2 border-gray-200 py-1 text-sm tracking-tighter text-gray-900 outline-none transition-all placeholder:text-gray-600 focus:border-gray-900 ltr:pr-5 ltr:pl-11 rtl:pl-5 rtl:pr-11 dark:border-gray-600 dark:bg-light-dark dark:text-white dark:placeholder:text-gray-500 dark:focus:border-gray-500 sm:ltr:pl-14 sm:rtl:pr-14 xl:ltr:pl-16 xl:rtl:pr-16"
+          placeholder="a word"
+          autoComplete="off"
+          id="secretInput"
+        />
+        <p>Please enter a new hash for the profile: </p>
+        <input
+          className="h-12 w-full appearance-none rounded-full border-2 border-gray-200 py-1 text-sm tracking-tighter text-gray-900 outline-none transition-all placeholder:text-gray-600 focus:border-gray-900 ltr:pr-5 ltr:pl-11 rtl:pl-5 rtl:pr-11 dark:border-gray-600 dark:bg-light-dark dark:text-white dark:placeholder:text-gray-500 dark:focus:border-gray-500 sm:ltr:pl-14 sm:rtl:pr-14 xl:ltr:pl-16 xl:rtl:pr-16"
+          placeholder="0x..."
+          autoComplete="off"
+          id="newHashInput"
+        />
+        {loading && (
+          <div className='flex justify-center'>
+            <HashLoader />
+          </div>
+        )}
+        <Button
+          size="large"
+          shape="rounded"
+          fullWidth={true}
+          onClick={handleRecover}
+          className="mt-6 uppercase xs:mt-8 xs:tracking-widest"
+        >
+          Recover
+        </Button>
       </div>
     </>
   )
@@ -77,8 +125,7 @@ const RecoverAccountPage: NextPageWithLayout = () => {
   return (
     <>
       <CarouselMenu carouselMenu={recoverAccountMenu}>
-        {(state.step == 0 && (<AccountPage />)) ||
-          (state.step == 1 && (<RecoverPage />))}
+        <AccountPage />
       </CarouselMenu>
     </>
   );
