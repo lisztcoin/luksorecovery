@@ -71,10 +71,6 @@ export default function WalletConnect() {
               </Transition>
             </Menu>
           </div>
-
-          <ActiveLink href="/create-goal">
-            <Button className="shadow-main hover:shadow-large">CREATE A GOAL</Button>
-          </ActiveLink>
         </div>
       ) : (
         <Button

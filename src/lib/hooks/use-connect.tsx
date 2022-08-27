@@ -3,6 +3,8 @@ import Web3Modal from 'web3modal';
 import { ethers } from 'ethers';
 import { sequence } from '0xsequence'
 import WalletConnect from '@walletconnect/web3-provider'
+import { useAtom } from 'jotai'
+import { atomWithStorage } from 'jotai/utils'
 
 const web3modalStorageKey = 'WEB3_CONNECT_CACHED_PROVIDER';
 
@@ -23,11 +25,14 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<boolean>(false);
   const [provider, setProvider] = useState<ethers.providers.Web3Provider | null>(null)
 
-  useEffect(() => {
-    if (web3Modal && web3Modal.cachedProvider) {
-      connectToWalletInternal();
-    }
-  }, [web3Modal])
+  // useEffect(() => {
+  //   const connectAsync = async () => {
+  //     await connectToWalletInternal();
+  //   }
+  //   if (web3Modal && web3Modal.cachedProvider) {
+  //     connectAsync()
+  //   }
+  // }, [web3Modal])
 
   const setWalletAddress = async (provider: any) => {
     try {
@@ -69,16 +74,18 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     if (web3Modal && web3Modal.cachedProvider) {
       web3Modal.clearCachedProvider()
     }
-    connectToWalletInternal()
+    await connectToWalletInternal()
   }
 
   const connectToWalletInternal = async () => {
     try {
+      console.log('inside wallet internal')
       setLoading(true);
       // checkIfExtensionIsAvailable();
       const wallet = web3Modal && await web3Modal.connect();
+      console.log('connect');
       const provider = new ethers.providers.Web3Provider(wallet);
-      await subscribeProvider(wallet);
+      // await subscribeProvider(wallet);
       setProvider(provider);
       setWalletAddress(provider);
       console.log("wallet: ", wallet);
