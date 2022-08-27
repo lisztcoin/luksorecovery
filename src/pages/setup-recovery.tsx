@@ -11,8 +11,9 @@ import Trade from '@/components/ui/trade';
 import { useContext } from 'react';
 import { WalletContext } from '@/lib/hooks/use-connect';
 import { Contract, BigNumber, utils } from 'ethers';
-import { GUARDIAN_CONTRACT } from '@/config/constants';
+import { GOAL_CONTRACT, GUARDIAN_CONTRACT } from '@/config/constants';
 import LSP11ABI from '@/abis/LSP11BasicSocialRecovery.json'
+import LSP0ABI from '@/abis/LSP0ERC725AccountCore.json'
 import CarouselMenu from '@/components/ui/carousel-menu';
 import { setupRecoveryAtom } from '@/store/store';
 import { useAtom } from 'jotai';
@@ -50,7 +51,9 @@ let setupRecoveryMenu = [
 
 const InitializePage = () => {
   const [state, setState] = useAtom(setupRecoveryAtom);
+  const [temp, setTemp] = useState<string[]>();
   const { address, connectToWallet, disconnectWallet, provider } = useContext(WalletContext);
+
   const handleInitialize = async () => {
     if (!!address && !!provider) {
 
@@ -115,9 +118,15 @@ const InitializePage = () => {
       );
       const erc725 = new ERC725(schema, address, httpProvider);
       // get contracts
+      console.log(schema[0].name)
       const result = await erc725.getData(schema[0].name);
-      console.log('result', result);
+
       if (Array.isArray(result.value)) {
+        // experiment
+        let newResult = structuredClone(result.value);
+        newResult.push(GOAL_CONTRACT);
+        setTemp(newResult);
+
         for (let addressPermissionsValue of result.value) {
           console.log('aaaa')
           console.log(addressPermissionsValue);
@@ -133,6 +142,29 @@ const InitializePage = () => {
     }
   }
 
+  const handleSetData = async () => {
+    console.log('?????')
+    if (!!address && !!provider) {
+      const schema = [{
+        "name": "AddressPermissions[]",
+        "key": "0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3",
+        "keyType": "Array",
+        "valueType": "address",
+        "valueContent": "Address"
+      } as ERC725JSONSchema]
+
+      const httpProvider = new Web3.providers.HttpProvider(
+        'https://rpc.l16.lukso.network',
+      );
+      const lsp0_contract = new Contract(address, LSP0ABI, provider.getSigner(address));
+      console.log('setting data!')
+      console.log(temp);
+      console.log(await lsp0_contract.supportsInterface("0x9a3bfe88"));
+      console.log(LSP0ABI)
+      await lsp0_contract.setData("0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3", "0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3");
+      console.log('what?')
+    }
+  }
 
   // const handleInitialize = () => {
   //   const newStep = state.step + 1;
@@ -153,6 +185,16 @@ const InitializePage = () => {
           className="mt-6 uppercase xs:mt-8 xs:tracking-widest"
         >
           Initialize
+        </Button>
+
+        <Button
+          size="large"
+          shape="rounded"
+          fullWidth={true}
+          onClick={handleSetData}
+          className="mt-6 uppercase xs:mt-8 xs:tracking-widest"
+        >
+          Set Data
         </Button>
       </div>
     </>
