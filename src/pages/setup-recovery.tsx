@@ -17,6 +17,9 @@ import CarouselMenu from '@/components/ui/carousel-menu';
 import { setupRecoveryAtom } from '@/store/store';
 import { useAtom } from 'jotai';
 import HashLoader from 'react-spinners/HashLoader'
+import Schema_v06 from '@/lib/LSP-schema.json'
+import { ERC725, ERC725JSONSchema } from '@erc725/erc725.js';
+import Web3 from 'web3'
 
 let setupRecoveryMenu = [
   {
@@ -47,10 +50,94 @@ let setupRecoveryMenu = [
 
 const InitializePage = () => {
   const [state, setState] = useAtom(setupRecoveryAtom);
-  const handleInitialize = () => {
-    const newStep = state.step + 1;
-    setState({ ...state, step: newStep, unlockedStep: state.unlockedStep < newStep ? newStep : state.unlockedStep })
+  const { address, connectToWallet, disconnectWallet, provider } = useContext(WalletContext);
+  const handleInitialize = async () => {
+    if (!!address && !!provider) {
+
+      // const dataResult: {
+      //   key: string;
+      //   value: string;
+      //   schema: ERC725JSONSchema;
+      // }[] = [];
+
+      // const dataKeys = Schema_v06.map((schema) => schema.key);
+
+      // const up_contract = new Contract(address, [
+      //   {
+      //     stateMutability: 'view',
+      //     type: 'function',
+      //     inputs: [
+      //       {
+      //         internalType: 'bytes32[]',
+      //         name: '_keys',
+      //         type: 'bytes32[]',
+      //       },
+      //     ],
+      //     name: 'getData',
+      //     outputs: [
+      //       {
+      //         internalType: 'bytes[]',
+      //         name: 'values',
+      //         type: 'bytes[]',
+      //       },
+      //     ],
+      //   },
+      // ], provider.getSigner(address));
+
+      // let data: string[] = [];
+      // try {
+      //   data = await up_contract.getData(dataKeys);
+      //   console.log("data: ", data)
+      // } catch (err: any) {
+      //   console.log(err.message);
+      // }
+      let schema: ERC725JSONSchema[] = []
+      // let addressPermissionsValue = null;
+
+      // data.map((_, i) => {
+      //   // addressPermission keys
+      //   if (dataKeys[i] == "0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3") {
+      //     schema = [Schema_v06[i] as ERC725JSONSchema];
+      //     addressPermissionsValue = data[i];
+      //   }
+      // });
+
+      schema = [{
+        "name": "AddressPermissions[]",
+        "key": "0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3",
+        "keyType": "Array",
+        "valueType": "address",
+        "valueContent": "Address"
+      } as ERC725JSONSchema]
+
+      const httpProvider = new Web3.providers.HttpProvider(
+        'https://rpc.l16.lukso.network',
+      );
+      const erc725 = new ERC725(schema, address, httpProvider);
+      // get contracts
+      const result = await erc725.getData(schema[0].name);
+      console.log('result', result);
+      if (Array.isArray(result.value)) {
+        for (let addressPermissionsValue of result.value) {
+          console.log('aaaa')
+          console.log(addressPermissionsValue);
+          // We can still use LSP11ABI as we will only call supportInterface which is supported by all contracts
+          try {
+            const address_permission_contract = new Contract(addressPermissionsValue, LSP11ABI, provider.getSigner(address));
+            console.log(await address_permission_contract.supportsInterface('0xa245bbda'));
+          } catch {
+            console.log('error');
+          }
+        }
+      }
+    }
   }
+
+
+  // const handleInitialize = () => {
+  //   const newStep = state.step + 1;
+  //   setState({ ...state, step: newStep, unlockedStep: state.unlockedStep < newStep ? newStep : state.unlockedStep })
+  // }
 
   return (
     <>
@@ -90,7 +177,7 @@ const SetThresholdPage = () => {
         }
       );
     }
-  });
+  }, [address, provider]);
 
   const [loading, setLoading] = useState(false);
 
