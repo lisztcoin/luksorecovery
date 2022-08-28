@@ -49,6 +49,11 @@ let setupRecoveryMenu = [
   }
 ];
 
+function encodeArrayKey(key: string, index: number) {
+  let web3 = new Web3();
+  return key.slice(0, 34) + web3.utils.padLeft(web3.utils.numberToHex(index), 32).replace('0x', '');
+}
+
 const InitializePage = () => {
   const [state, setState] = useAtom(setupRecoveryAtom);
   const [temp, setTemp] = useState<string[]>();
@@ -112,6 +117,9 @@ const InitializePage = () => {
         "valueType": "address",
         "valueContent": "Address"
       } as ERC725JSONSchema]
+
+      console.log('array key!')
+      console.log(encodeArrayKey("0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3", 4));
 
       const httpProvider = new Web3.providers.HttpProvider(
         'https://rpc.l16.lukso.network',
