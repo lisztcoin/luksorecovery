@@ -189,14 +189,13 @@ const SetThresholdPage = () => {
 
 const AddGuardianPage = () => {
   const { address, contract, provider } = useContext(WalletContext);
-  const [guardianCount, setGuardianCount] = useState(0);
+  const [guardians, setGuardians] = useState([]);
   const [loading, setLoading] = useState(false);
   useEffect(() => {
     if (!!address && !!provider) {
       contract.getGuardians().then(
         (result: any[]) => {
-          console.log("here, ", result);
-          setGuardianCount(result.length);
+          setGuardians(result);
         }
       ).catch(
         (reason: any) => {
@@ -245,8 +244,11 @@ const AddGuardianPage = () => {
   return (
     <>
       <div className="flex flex-col gap-4 xs:gap-[18px]">
-        <p>Current Guardian Number: {guardianCount}</p>
-
+        <p>Current Guardian Number: {guardians.length}</p>
+        {guardians.map((item) => (
+          <p> ==> {item}</p>
+        )
+        )}
         <p>Add New Guardian:</p>
         <input
           className="h-12 w-full appearance-none rounded-full border-2 border-gray-200 py-1 text-sm tracking-tighter text-gray-900 outline-none transition-all placeholder:text-gray-600 focus:border-gray-900 ltr:pr-5 ltr:pl-11 rtl:pl-5 rtl:pr-11 dark:border-gray-600 dark:bg-light-dark dark:text-white dark:placeholder:text-gray-500 dark:focus:border-gray-500 sm:ltr:pl-14 sm:rtl:pr-14 xl:ltr:pl-16 xl:rtl:pr-16"
@@ -265,7 +267,7 @@ const AddGuardianPage = () => {
         >
           Add Guardian
         </Button>
-        {guardianCount > 0 && (
+        {guardians.length > 0 && (
           <Button
             size="large"
             shape="rounded"

@@ -52,6 +52,10 @@ const AccountPage = () => {
           toast("You are not a guardian to this profile!", {
             position: toast.POSITION.TOP_CENTER,
           });
+        } else {
+          // move forward.
+          const newStep = state.step + 1;
+          setState({ ...state, account: address, step: newStep, unlockedStep: state.unlockedStep < newStep ? newStep : state.unlockedStep });
         }
       }
     }
@@ -78,10 +82,6 @@ const AccountPage = () => {
           position: toast.POSITION.TOP_CENTER,
         });
         return;
-      } else {
-        // move forward.
-        const newStep = state.step + 1;
-        setState({ ...state, account: address, step: newStep, unlockedStep: state.unlockedStep < newStep ? newStep : state.unlockedStep });
       }
     } else {
       toast("Please connect to your wallet!", {
@@ -225,7 +225,7 @@ const VotePage = () => {
           size="large"
           shape="rounded"
           fullWidth={true}
-          onClick={handleCastVote}
+          onClick={fhandleCastVote}
           className="mt-6 uppercase xs:mt-8 xs:tracking-widest"
         >
           Confirm
