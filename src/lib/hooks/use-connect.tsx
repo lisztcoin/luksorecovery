@@ -7,6 +7,8 @@ import { useAtom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
 import LSP11ABI from '@/abis/LSP11BasicSocialRecovery.json'
 import { Contract } from 'ethers';
+import Web3 from 'web3'
+import { ERC725, ERC725JSONSchema } from '@erc725/erc725.js';
 
 const web3modalStorageKey = 'WEB3_CONNECT_CACHED_PROVIDER';
 
@@ -28,11 +30,42 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const [provider, setProvider] = useState<ethers.providers.Web3Provider | null>(null)
   const [contract, setContract] = useState<Contract>();
 
-  const setLsp11Contract = (contractAddress: string) => {
+  const setLsp11Contract = async (targetAddress: string) => {
+    let isContractSet = false;
     if (provider) {
-      const lsp11Contract = new Contract(contractAddress, LSP11ABI, provider.getSigner(address));
-      setContract(lsp11Contract);
+      let schema: ERC725JSONSchema[] = []
+
+      schema = [{
+        "name": "AddressPermissions[]",
+        "key": "0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3",
+        "keyType": "Array",
+        "valueType": "address",
+        "valueContent": "Address"
+      } as ERC725JSONSchema]
+
+      const httpProvider = new Web3.providers.HttpProvider(
+        'https://rpc.l16.lukso.network',
+      );
+      const erc725 = new ERC725(schema, targetAddress, httpProvider);
+      // get contracts
+      const result = await erc725.getData(schema[0].name);
+      if (Array.isArray(result.value)) {
+        for (let addressPermissionsValue of result.value) {
+          // We can still use LSP11ABI as we will only call supportInterface which is supported by all contracts
+          try {
+            const address_permission_contract = new Contract(addressPermissionsValue, LSP11ABI, provider.getSigner(address));
+            console.log(addressPermissionsValue);
+            if (await address_permission_contract.supportsInterface('0xcb81043b')) {
+              await setContract(address_permission_contract);
+              isContractSet = true;
+            }
+          } catch (error) {
+            console.log(error);
+          }
+        }
+      }
     }
+    return isContractSet;
   }
 
   const setWalletAddress = async (provider: any) => {

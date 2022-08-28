@@ -9,7 +9,7 @@ import { WalletContext } from '@/lib/hooks/use-connect';
 import { Contract, BigNumber, utils } from 'ethers';
 import LSP11ABI from '@/abis/LSP11BasicSocialRecovery.json'
 import CarouselMenu from '@/components/ui/carousel-menu';
-import { setupRecoveryAtom, profileLSP11ContractAtom } from '@/store/store';
+import { setupRecoveryAtom } from '@/store/store';
 import { useAtom } from 'jotai';
 import { ERC725, ERC725JSONSchema } from '@erc725/erc725.js';
 import Web3 from 'web3'
@@ -44,14 +44,8 @@ let setupRecoveryMenu = [
   }
 ];
 
-function encodeArrayKey(key: string, index: number) {
-  let web3 = new Web3();
-  return key.slice(0, 34) + web3.utils.padLeft(web3.utils.numberToHex(index), 32).replace('0x', '');
-}
-
 const InitializePage = () => {
   const [setupRecoveryState, setSetupRecoveryState] = useAtom(setupRecoveryAtom);
-  const [lsp11ContractState, setLsp11ContractState] = useAtom(profileLSP11ContractAtom);
   const [loading, setLoading] = useState(false);
   const { address, provider, contract, setLsp11Contract } = useContext(WalletContext);
 
@@ -59,39 +53,9 @@ const InitializePage = () => {
 
     if (!!address && !!provider) {
       setLoading(true);
-      let schema: ERC725JSONSchema[] = []
-
-      schema = [{
-        "name": "AddressPermissions[]",
-        "key": "0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3",
-        "keyType": "Array",
-        "valueType": "address",
-        "valueContent": "Address"
-      } as ERC725JSONSchema]
-
-      const httpProvider = new Web3.providers.HttpProvider(
-        'https://rpc.l16.lukso.network',
-      );
-      const erc725 = new ERC725(schema, address, httpProvider);
-      // get contracts
-      const result = await erc725.getData(schema[0].name);
-      let hasLSP11Contract = false;
-      if (Array.isArray(result.value)) {
-        for (let addressPermissionsValue of result.value) {
-          // We can still use LSP11ABI as we will only call supportInterface which is supported by all contracts
-          try {
-            const address_permission_contract = new Contract(addressPermissionsValue, LSP11ABI, provider.getSigner(address));
-            if (await address_permission_contract.supportsInterface('0xcb81043b')) {
-              hasLSP11Contract = true;
-              setLsp11Contract(addressPermissionsValue);
-            }
-          } catch {
-            console.log('error that can be ignored');
-          }
-        }
-      }
+      const success = await setLsp11Contract(address);
       setLoading(false);
-      if (!hasLSP11Contract) {
+      if (!success) {
         toast("Your profile does not support LSP11!", {
           position: toast.POSITION.TOP_CENTER,
         });
@@ -100,7 +64,6 @@ const InitializePage = () => {
         const newStep = setupRecoveryState.step + 1;
         setSetupRecoveryState({ ...setupRecoveryState, step: newStep, unlockedStep: setupRecoveryState.unlockedStep < newStep ? newStep : setupRecoveryState.unlockedStep })
       }
-
     } else {
       toast("Please connect to your wallet!", {
         position: toast.POSITION.TOP_CENTER,
@@ -162,7 +125,7 @@ const SetThresholdPage = () => {
         let tx = await contract.setThreshold(parseInt(threshold));
         let receipt = await tx.wait();
       } catch {
-        toast("Failed to set threshold! Please check your wallet transaction history to see details", {
+        toast("Failed to set threshold!", {
           position: toast.POSITION.TOP_CENTER,
         });
       }
@@ -255,7 +218,7 @@ const AddGuardianPage = () => {
         let tx = await contract.addGuardian(guardianAddress);
         let receipt = await tx.wait();
       } catch {
-        toast("Failed to add guardian! Please check your wallet transaction history to see details", {
+        toast("Failed to add guardian!", {
           position: toast.POSITION.TOP_CENTER,
         });
       }
@@ -339,7 +302,7 @@ const SecretPage = () => {
           position: toast.POSITION.TOP_CENTER,
         });
       } catch {
-        toast("Failed to set secret! Please check your wallet transaction history to see details", {
+        toast("Failed to set secret!", {
           position: toast.POSITION.TOP_CENTER,
         });
       }

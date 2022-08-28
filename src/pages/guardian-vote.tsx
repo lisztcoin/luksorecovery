@@ -1,13 +1,8 @@
 import { useEffect, useState } from 'react';
 import type { NextPageWithLayout } from '@/types';
 import cn from 'classnames';
-import { NextSeo } from 'next-seo';
 import Button from '@/components/ui/button';
-import CoinInput from '@/components/ui/coin-input';
-import TransactionInfo from '@/components/ui/transaction-info';
-import { SwapIcon } from '@/components/icons/swap-icon';
 import DashboardLayout from '@/layouts/_dashboard';
-import Trade from '@/components/ui/trade';
 import { useContext } from 'react';
 import { WalletContext } from '@/lib/hooks/use-connect';
 import { Contract, BigNumber, utils } from 'ethers';
@@ -15,9 +10,10 @@ import { GUARDIAN_CONTRACT } from '@/config/constants';
 import LSP11ABI from '@/abis/LSP11BasicSocialRecovery.json'
 import CarouselMenu from '@/components/ui/carousel-menu';
 import { voteAtom } from '@/store/store';
-import { useAtom } from 'jotai';
-import { HashLoader } from 'react-spinners';
 import ProcessInfo from '@/components/ui/process-info';
+import { useAtom } from 'jotai';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const guardianVoteMenu = [
   {
@@ -41,28 +37,56 @@ const guardianVoteMenu = [
 ];
 
 const AccountPage = () => {
-  const { address, connectToWallet, disconnectWallet, provider } = useContext(WalletContext);
+  let { address, contract, setLsp11Contract, provider } = useContext(WalletContext);
   const [state, setState] = useAtom(voteAtom);
+  const [loading, setLoading] = useState(false);
 
-  const isGuardian = async () => {
-    const goal_contract = new Contract(GUARDIAN_CONTRACT, LSP11ABI, provider.getSigner(address));
-    const result = await goal_contract.isGuardian(address)
-    return result;
-  }
+  useEffect(() => {
+    const isGuardian = async () => {
+      let result = false;
+      // wait for the contract variable to be updated.
+      if (contract) {
+        console.log('contract not null!')
+        result = await contract.isGuardian(address)
+        if (!result) {
+          toast("You are not a guardian to this profile!", {
+            position: toast.POSITION.TOP_CENTER,
+          });
+        }
+      }
+    }
+    isGuardian();
+  }, [contract])
 
   const handleSetAccount = async () => {
+    setLoading(true);
+    await setAccount();
+    setLoading(false);
+  }
+
+  const setAccount = async () => {
     if (!!address && !!provider) {
       let accountInput = document.getElementById("accountInput");
       let account = ""
       if (accountInput != null) {
         account = (accountInput as HTMLInputElement).value;
       }
-      // Check whether this account has LSP11 attached
-      const validGuardian = await isGuardian();
-      if (validGuardian) {
+      const success = await setLsp11Contract(account);
+      // update Contract to reflect the new state.
+      if (!success) {
+        toast("This profile does not support LSP11!", {
+          position: toast.POSITION.TOP_CENTER,
+        });
+        return;
+      } else {
+        // move forward.
         const newStep = state.step + 1;
-        setState({ ...state, account: account, step: newStep, unlockedStep: state.unlockedStep < newStep ? newStep : state.unlockedStep });
+        setState({ ...state, account: address, step: newStep, unlockedStep: state.unlockedStep < newStep ? newStep : state.unlockedStep });
       }
+    } else {
+      toast("Please connect to your wallet!", {
+        position: toast.POSITION.TOP_CENTER,
+      });
     }
   }
 
@@ -77,6 +101,7 @@ const AccountPage = () => {
           id="accountInput"
         />
         <Button
+          isLoading={loading}
           size="large"
           shape="rounded"
           fullWidth={true}
@@ -85,6 +110,7 @@ const AccountPage = () => {
         >
           Confirm
         </Button>
+        <ToastContainer autoClose={6000} />
       </div>
     </>
   )
@@ -92,32 +118,24 @@ const AccountPage = () => {
 
 const NamePage = () => {
 
-  const { address, connectToWallet, disconnectWallet, provider } = useContext(WalletContext);
+  const { address, contract, provider } = useContext(WalletContext);
   const [state, setState] = useAtom(voteAtom);
   const [process, setProcess] = useState<any[]>([]);
 
   const handleSetProcessName = () => {
-    if (!!address && !!provider) {
-      let nameInput = document.getElementById("nameInput");
-      let processName = "";
-      if (nameInput != null) {
-        processName = (nameInput as HTMLInputElement).value;
-      }
-      // Check whether this account has LSP11 attached and whether you are a guardian.
-      // let tx = await goal_contract.setThreshold(parseInt(threshold));
-      // let receipt = await tx.wait();
-      const newStep = state.step + 1;
-      setState({ ...state, processName: processName, step: newStep, unlockedStep: state.unlockedStep < newStep ? newStep : state.unlockedStep });
+    let nameInput = document.getElementById("nameInput");
+    let processName = "";
+    if (nameInput != null) {
+      processName = (nameInput as HTMLInputElement).value;
     }
+    const newStep = state.step + 1;
+    setState({ ...state, processName: processName, step: newStep, unlockedStep: state.unlockedStep < newStep ? newStep : state.unlockedStep });
   }
 
   useEffect(() => {
     if (!!address && !!provider) {
-      console.log("thre");
-      const goal_contract = new Contract(GUARDIAN_CONTRACT, LSP11ABI, provider.getSigner(address));
-      goal_contract.getRecoverProcessesIds().then(
+      contract.getRecoverProcessesIds().then(
         (result: any[]) => {
-          console.log('weird, ', result);
           setProcess(result);
         }
       );
@@ -128,7 +146,7 @@ const NamePage = () => {
     <>
       <div className="flex flex-col gap-4 xs:gap-[18px]">
         <p>Enter an existing process to join, or enter a new process name to create a new voting process. </p>
-        <p>Existing Processes: </p>
+        <p>Existing Processes: {process.length == 0 && "None"}</p>
         {process.map((item, index) => (
           <ProcessInfo
             label={utils.parseBytes32String(item)}
@@ -151,49 +169,44 @@ const NamePage = () => {
         >
           Confirm
         </Button>
+        <ToastContainer autoClose={6000} />
       </div>
     </>
   )
 }
 
 const VotePage = () => {
-  const { address, connectToWallet, disconnectWallet, provider } = useContext(WalletContext);
-  const getThreshold = () => {
-    if (!!address && !!provider) {
-      const goal_contract = new Contract(GUARDIAN_CONTRACT, LSP11ABI, provider.getSigner(address));
-
-      goal_contract.getGuardiansThreshold().then(
-        (result: any) => {
-          console.log(result);
-          alert(result);
-        }
-      ).catch(
-        (reason: any) => {
-          console.log(reason.message);
-        }
-      );
-    }
-  }
+  const { address, contract, provider } = useContext(WalletContext);
   const [state, setState] = useAtom(voteAtom);
   const [loading, setLoading] = useState(false);
 
   const castVote = async () => {
     if (!!address && !!provider) {
-      const goal_contract = new Contract(GUARDIAN_CONTRACT, LSP11ABI, provider.getSigner(address));
       let newOwnerInput = document.getElementById("newOwnerInput");
       let newOwner = ""
       if (newOwnerInput != null) {
         newOwner = (newOwnerInput as HTMLInputElement).value;
       }
-      setLoading(true);
-      console.log("process, ", state.processName);
-      console.log("newOwner, ", newOwner);
-      let tx = await goal_contract.voteToRecover(utils.formatBytes32String(state.processName), newOwner);
-      let receipt = await tx.wait();
+      try {
+        let tx = await contract.voteToRecover(utils.formatBytes32String(state.processName), newOwner);
+        let receipt = await tx.wait();
+        toast("Success!", {
+          position: toast.POSITION.TOP_CENTER,
+        });
+      } catch {
+        toast("Failed to cast your vote!", {
+          position: toast.POSITION.TOP_CENTER,
+        });
+      }
+    } else {
+      toast("Please connect to your wallet!", {
+        position: toast.POSITION.TOP_CENTER,
+      });
     }
   }
 
   const handleCastVote = async () => {
+    setLoading(true);
     await castVote();
     setLoading(false);
   }
@@ -207,12 +220,8 @@ const VotePage = () => {
           autoComplete="off"
           id="newOwnerInput"
         />
-        {loading && (
-          <div className='flex justify-center'>
-            <HashLoader />
-          </div>
-        )}
         <Button
+          isLoading={loading}
           size="large"
           shape="rounded"
           fullWidth={true}
@@ -221,6 +230,7 @@ const VotePage = () => {
         >
           Confirm
         </Button>
+        <ToastContainer autoClose={6000} />
       </div>
     </>
   )
