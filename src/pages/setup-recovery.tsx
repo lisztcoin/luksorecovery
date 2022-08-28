@@ -15,6 +15,7 @@ import { ERC725, ERC725JSONSchema } from '@erc725/erc725.js';
 import Web3 from 'web3'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import GuardianName from '@/components/ui/GuardianName'
 
 
 let setupRecoveryMenu = [
@@ -241,12 +242,13 @@ const AddGuardianPage = () => {
     setState({ ...state, step: newStep, unlockedStep: state.unlockedStep < newStep ? newStep : state.unlockedStep })
   }
 
+
   return (
     <>
       <div className="flex flex-col gap-4 xs:gap-[18px]">
         <p>Current Guardian Number: {guardians.length}</p>
         {guardians.map((item) => (
-          <p> ==> {item}</p>
+          <GuardianName label={item} key={item} />
         )
         )}
         <p>Add New Guardian:</p>
