@@ -1,24 +1,16 @@
 import { useEffect, useState } from 'react';
 import type { NextPageWithLayout } from '@/types';
 import cn from 'classnames';
-import { NextSeo } from 'next-seo';
 import Button from '@/components/ui/button';
-import CoinInput from '@/components/ui/coin-input';
-import TransactionInfo from '@/components/ui/transaction-info';
-import { SwapIcon } from '@/components/icons/swap-icon';
 import DashboardLayout from '@/layouts/_dashboard';
 import Trade from '@/components/ui/trade';
 import { useContext } from 'react';
 import { WalletContext } from '@/lib/hooks/use-connect';
 import { Contract, BigNumber, utils } from 'ethers';
-import { GOAL_CONTRACT, GUARDIAN_CONTRACT } from '@/config/constants';
 import LSP11ABI from '@/abis/LSP11BasicSocialRecovery.json'
-import LSP0ABI from '@/abis/LSP0ERC725AccountCore.json'
 import CarouselMenu from '@/components/ui/carousel-menu';
 import { setupRecoveryAtom, profileLSP11ContractAtom } from '@/store/store';
 import { useAtom } from 'jotai';
-import HashLoader from 'react-spinners/HashLoader'
-import Schema_v06 from '@/lib/LSP-schema.json'
 import { ERC725, ERC725JSONSchema } from '@erc725/erc725.js';
 import Web3 from 'web3'
 import { ToastContainer, toast } from 'react-toastify';
@@ -86,8 +78,6 @@ const InitializePage = () => {
       let hasLSP11Contract = false;
       if (Array.isArray(result.value)) {
         for (let addressPermissionsValue of result.value) {
-          console.log('aaaa')
-          console.log(addressPermissionsValue);
           // We can still use LSP11ABI as we will only call supportInterface which is supported by all contracts
           try {
             const address_permission_contract = new Contract(addressPermissionsValue, LSP11ABI, provider.getSigner(address));
@@ -134,15 +124,17 @@ const InitializePage = () => {
         >
           Initialize
         </Button>
-        <ToastContainer autoClose={8000} />
+        <ToastContainer autoClose={6000} />
       </div>
     </>
   )
 }
 
 const SetThresholdPage = () => {
-  const { address, contract, connectToWallet, disconnectWallet, provider } = useContext(WalletContext);
+  const { address, contract, provider } = useContext(WalletContext);
   const [thresholdNumber, setThresholdNumber] = useState("0");
+  const [loading, setLoading] = useState(false);
+  const [state, setState] = useAtom(setupRecoveryAtom);
 
   useEffect(() => {
     if (!!address && !!provider) {
@@ -158,23 +150,28 @@ const SetThresholdPage = () => {
     }
   }, [address, provider]);
 
-  const [loading, setLoading] = useState(false);
-
   const setThreshold = async () => {
     if (!!address && !!provider) {
-      const goal_contract = new Contract(GUARDIAN_CONTRACT, LSP11ABI, provider.getSigner(address));
+      setLoading(true);
       let thresholdInput = document.getElementById("thresholdInput");
       let threshold = ""
       if (thresholdInput != null) {
         threshold = (thresholdInput as HTMLInputElement).value;
       }
-      setLoading(true);
-      let tx = await goal_contract.setThreshold(parseInt(threshold));
-      let receipt = await tx.wait();
+      try {
+        let tx = await contract.setThreshold(parseInt(threshold));
+        let receipt = await tx.wait();
+      } catch {
+        toast("Failed to set threshold! Please check your wallet transaction history to see details", {
+          position: toast.POSITION.TOP_CENTER,
+        });
+      }
+    } else {
+      toast("Please connect to your wallet!", {
+        position: toast.POSITION.TOP_CENTER,
+      });
     }
   }
-
-  const [state, setState] = useAtom(setupRecoveryAtom);
 
   const handleSetThreshold = async () => {
     await setThreshold();
@@ -191,7 +188,8 @@ const SetThresholdPage = () => {
   return (
     <>
       <div className="flex flex-col gap-4 xs:gap-[18px]">
-        <p>Current Threshold: {thresholdNumber} </p>
+        <p>Please enter a number between 1 and the guardian count.</p>
+        <p>Current Threshold: {parseInt(thresholdNumber) > 0 ? thresholdNumber : "NOT SET"} </p>
         <p>New Threshold: </p>
         <input
           className="h-12 w-full appearance-none rounded-full border-2 border-gray-200 py-1 text-sm tracking-tighter text-gray-900 outline-none transition-all placeholder:text-gray-600 focus:border-gray-900 ltr:pr-5 ltr:pl-11 rtl:pl-5 rtl:pr-11 dark:border-gray-600 dark:bg-light-dark dark:text-white dark:placeholder:text-gray-500 dark:focus:border-gray-500 sm:ltr:pl-14 sm:rtl:pr-14 xl:ltr:pl-16 xl:rtl:pr-16"
@@ -199,12 +197,9 @@ const SetThresholdPage = () => {
           autoComplete="off"
           id="thresholdInput"
         />
-        {loading && (
-          <div className='flex justify-center'>
-            <HashLoader />
-          </div>
-        )}
+        <ToastContainer autoClose={6000} />
         <Button
+          isLoading={loading}
           size="large"
           shape="rounded"
           fullWidth={true}
@@ -256,33 +251,23 @@ const AddGuardianPage = () => {
         guardianAddress = (guardianInput as HTMLInputElement).value;
       }
       setLoading(true);
-      let tx = await contract.addGuardian(guardianAddress);
-      let receipt = await tx.wait();
-    }
-  }
-
-  const removeGuardians = () => {
-    if (!!address && !!provider) {
-      const goal_contract = new Contract(GUARDIAN_CONTRACT, LSP11ABI, provider.getSigner(address));
-      let guardianInput = document.getElementById("guardianInput");
-      let guardianAddress = ""
-      if (guardianInput != null) {
-        guardianAddress = (guardianInput as HTMLInputElement).value;
+      try {
+        let tx = await contract.addGuardian(guardianAddress);
+        let receipt = await tx.wait();
+      } catch {
+        toast("Failed to add guardian! Please check your wallet transaction history to see details", {
+          position: toast.POSITION.TOP_CENTER,
+        });
       }
-      goal_contract.removeGuardian(guardianAddress).then(
-        () => {
-        }
-      ).catch(
-        (reason: any) => {
-          console.log("reason:", reason.message);
-        }
-      );
+    } else {
+      toast("Please connect to your wallet!", {
+        position: toast.POSITION.TOP_CENTER,
+      });
     }
   }
 
   const [state, setState] = useAtom(setupRecoveryAtom);
   const handleAddGuardian = async () => {
-    //0x37684639E96D85853BC1D8813a86252F79EfccE6
     await addGuardians();
     setLoading(false);
     const newStep = state.step + 1;
@@ -306,7 +291,9 @@ const AddGuardianPage = () => {
           autoComplete="off"
           id="guardianInput"
         />
+        <ToastContainer autoClose={6000} />
         <Button
+          isLoading={loading}
           size="large"
           shape="rounded"
           fullWidth={true}
@@ -334,53 +321,65 @@ const AddGuardianPage = () => {
 
 const SecretPage = () => {
 
-  const { address, connectToWallet, disconnectWallet, provider } = useContext(WalletContext);
-  const setSecret = () => {
+  const { address, contract, provider } = useContext(WalletContext);
+  const [loading, setLoading] = useState(false);
+  const setSecret = async () => {
     if (!!address && !!provider) {
-      const goal_contract = new Contract(GUARDIAN_CONTRACT, LSP11ABI, provider.getSigner(address));
       let secretInput = document.getElementById("secretInput");
       let secret = ""
       if (secretInput != null) {
         secret = (secretInput as HTMLInputElement).value;
       }
-      console.log("secret: ", secret)
-      goal_contract.setSecret(secret).then(
-        () => {
-        }
-      ).catch(
-        (reason: any) => {
-          console.log("reason:", reason.message);
-        }
-      );
+      try {
+        const hashedSecret = utils.keccak256(utils.toUtf8Bytes(secret));
+        console.log(hashedSecret);
+        const tx = await contract.setSecret(hashedSecret);
+        let receipt = await tx.wait();
+        toast("Success! Your profile can now be recovered through guardians!", {
+          position: toast.POSITION.TOP_CENTER,
+        });
+      } catch {
+        toast("Failed to set secret! Please check your wallet transaction history to see details", {
+          position: toast.POSITION.TOP_CENTER,
+        });
+      }
     }
   }
+
+  const handleSetSecret = async () => {
+    setLoading(true);
+    await setSecret();
+    setLoading(false);
+  }
+
   return (
     <>
       <div className="flex flex-col gap-4 xs:gap-[18px]">
-        <p>If you have already set secret, you are all set!</p>
+        <p>Set a new secret, or override the old one!</p>
         <input
           className="h-12 w-full appearance-none rounded-full border-2 border-gray-200 py-1 text-sm tracking-tighter text-gray-900 outline-none transition-all placeholder:text-gray-600 focus:border-gray-900 ltr:pr-5 ltr:pl-11 rtl:pl-5 rtl:pr-11 dark:border-gray-600 dark:bg-light-dark dark:text-white dark:placeholder:text-gray-500 dark:focus:border-gray-500 sm:ltr:pl-14 sm:rtl:pr-14 xl:ltr:pl-16 xl:rtl:pr-16"
-          placeholder="Enter a keccak256 generated hash starting with 0x"
+          placeholder="The secret will be hashed by keccak256 method."
           autoComplete="off"
           id="secretInput"
         />
 
         <Button
+          isLoading={loading}
           size="large"
           shape="rounded"
           fullWidth={true}
-          onClick={setSecret}
+          onClick={handleSetSecret}
           className="mt-2 uppercase xs:mt-4 xs:tracking-widest"
         >
           Set Secret & Finish Setup
         </Button>
+        <ToastContainer autoClose={6000} />
       </div>
     </>
   )
 }
 
 const SetupRecoveryPage: NextPageWithLayout = () => {
-  const { address, connectToWallet, disconnectWallet, provider } = useContext(WalletContext);
   const [state, setState] = useAtom(setupRecoveryAtom);
   const [menu, setMenu] = useState(setupRecoveryMenu);
 
