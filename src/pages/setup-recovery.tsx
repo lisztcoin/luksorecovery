@@ -15,12 +15,15 @@ import { GOAL_CONTRACT, GUARDIAN_CONTRACT } from '@/config/constants';
 import LSP11ABI from '@/abis/LSP11BasicSocialRecovery.json'
 import LSP0ABI from '@/abis/LSP0ERC725AccountCore.json'
 import CarouselMenu from '@/components/ui/carousel-menu';
-import { setupRecoveryAtom } from '@/store/store';
+import { setupRecoveryAtom, profileLSP11ContractAtom } from '@/store/store';
 import { useAtom } from 'jotai';
 import HashLoader from 'react-spinners/HashLoader'
 import Schema_v06 from '@/lib/LSP-schema.json'
 import { ERC725, ERC725JSONSchema } from '@erc725/erc725.js';
 import Web3 from 'web3'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 let setupRecoveryMenu = [
   {
@@ -55,60 +58,16 @@ function encodeArrayKey(key: string, index: number) {
 }
 
 const InitializePage = () => {
-  const [state, setState] = useAtom(setupRecoveryAtom);
-  const [temp, setTemp] = useState<string[]>();
-  const { address, connectToWallet, disconnectWallet, provider } = useContext(WalletContext);
+  const [setupRecoveryState, setSetupRecoveryState] = useAtom(setupRecoveryAtom);
+  const [lsp11ContractState, setLsp11ContractState] = useAtom(profileLSP11ContractAtom);
+  const [loading, setLoading] = useState(false);
+  const { address, provider, contract, setLsp11Contract } = useContext(WalletContext);
 
   const handleInitialize = async () => {
+
     if (!!address && !!provider) {
-
-      // const dataResult: {
-      //   key: string;
-      //   value: string;
-      //   schema: ERC725JSONSchema;
-      // }[] = [];
-
-      // const dataKeys = Schema_v06.map((schema) => schema.key);
-
-      // const up_contract = new Contract(address, [
-      //   {
-      //     stateMutability: 'view',
-      //     type: 'function',
-      //     inputs: [
-      //       {
-      //         internalType: 'bytes32[]',
-      //         name: '_keys',
-      //         type: 'bytes32[]',
-      //       },
-      //     ],
-      //     name: 'getData',
-      //     outputs: [
-      //       {
-      //         internalType: 'bytes[]',
-      //         name: 'values',
-      //         type: 'bytes[]',
-      //       },
-      //     ],
-      //   },
-      // ], provider.getSigner(address));
-
-      // let data: string[] = [];
-      // try {
-      //   data = await up_contract.getData(dataKeys);
-      //   console.log("data: ", data)
-      // } catch (err: any) {
-      //   console.log(err.message);
-      // }
+      setLoading(true);
       let schema: ERC725JSONSchema[] = []
-      // let addressPermissionsValue = null;
-
-      // data.map((_, i) => {
-      //   // addressPermission keys
-      //   if (dataKeys[i] == "0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3") {
-      //     schema = [Schema_v06[i] as ERC725JSONSchema];
-      //     addressPermissionsValue = data[i];
-      //   }
-      // });
 
       schema = [{
         "name": "AddressPermissions[]",
@@ -118,74 +77,55 @@ const InitializePage = () => {
         "valueContent": "Address"
       } as ERC725JSONSchema]
 
-      console.log('array key!')
-      console.log(encodeArrayKey("0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3", 4));
-
       const httpProvider = new Web3.providers.HttpProvider(
         'https://rpc.l16.lukso.network',
       );
       const erc725 = new ERC725(schema, address, httpProvider);
       // get contracts
-      console.log(schema[0].name)
       const result = await erc725.getData(schema[0].name);
-
+      let hasLSP11Contract = false;
       if (Array.isArray(result.value)) {
-        // experiment
-        let newResult = structuredClone(result.value);
-        newResult.push(GOAL_CONTRACT);
-        setTemp(newResult);
-
         for (let addressPermissionsValue of result.value) {
           console.log('aaaa')
           console.log(addressPermissionsValue);
           // We can still use LSP11ABI as we will only call supportInterface which is supported by all contracts
           try {
             const address_permission_contract = new Contract(addressPermissionsValue, LSP11ABI, provider.getSigner(address));
-            console.log(await address_permission_contract.supportsInterface('0xa245bbda'));
+            if (await address_permission_contract.supportsInterface('0xcb81043b')) {
+              hasLSP11Contract = true;
+              setLsp11Contract(addressPermissionsValue);
+            }
           } catch {
-            console.log('error');
+            console.log('error that can be ignored');
           }
         }
       }
+      setLoading(false);
+      if (!hasLSP11Contract) {
+        toast("Your profile does not support LSP11!", {
+          position: toast.POSITION.TOP_CENTER,
+        });
+      } else {
+        // move forward
+        const newStep = setupRecoveryState.step + 1;
+        setSetupRecoveryState({ ...setupRecoveryState, step: newStep, unlockedStep: setupRecoveryState.unlockedStep < newStep ? newStep : setupRecoveryState.unlockedStep })
+      }
+
+    } else {
+      toast("Please connect to your wallet!", {
+        position: toast.POSITION.TOP_CENTER,
+      });
     }
   }
-
-  const handleSetData = async () => {
-    console.log('?????')
-    if (!!address && !!provider) {
-      const schema = [{
-        "name": "AddressPermissions[]",
-        "key": "0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3",
-        "keyType": "Array",
-        "valueType": "address",
-        "valueContent": "Address"
-      } as ERC725JSONSchema]
-
-      const httpProvider = new Web3.providers.HttpProvider(
-        'https://rpc.l16.lukso.network',
-      );
-      const lsp0_contract = new Contract(address, LSP0ABI, provider.getSigner(address));
-      console.log('setting data!')
-      console.log(temp);
-      console.log(await lsp0_contract.supportsInterface("0x9a3bfe88"));
-      console.log(LSP0ABI)
-      await lsp0_contract.setData("0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3", "0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3");
-      console.log('what?')
-    }
-  }
-
-  // const handleInitialize = () => {
-  //   const newStep = state.step + 1;
-  //   setState({ ...state, step: newStep, unlockedStep: state.unlockedStep < newStep ? newStep : state.unlockedStep })
-  // }
 
   return (
     <>
       <div className="flex flex-col gap-4 xs:gap-[18px]">
         <div className="text-sm leading-6 tracking-tighter text-gray-600 dark:text-gray-400">
-          Click Next
+          <p> Please make sure your profile supports LSP11, and click Initialize button </p>
         </div>
         <Button
+          isLoading={loading}
           size="large"
           shape="rounded"
           fullWidth={true}
@@ -194,30 +134,19 @@ const InitializePage = () => {
         >
           Initialize
         </Button>
-
-        <Button
-          size="large"
-          shape="rounded"
-          fullWidth={true}
-          onClick={handleSetData}
-          className="mt-6 uppercase xs:mt-8 xs:tracking-widest"
-        >
-          Set Data
-        </Button>
+        <ToastContainer autoClose={8000} />
       </div>
     </>
   )
 }
 
 const SetThresholdPage = () => {
-  const { address, connectToWallet, disconnectWallet, provider } = useContext(WalletContext);
+  const { address, contract, connectToWallet, disconnectWallet, provider } = useContext(WalletContext);
   const [thresholdNumber, setThresholdNumber] = useState("0");
 
   useEffect(() => {
     if (!!address && !!provider) {
-      const goal_contract = new Contract(GUARDIAN_CONTRACT, LSP11ABI, provider.getSigner(address));
-
-      goal_contract.getGuardiansThreshold().then(
+      contract.getGuardiansThreshold().then(
         (result: any) => {
           setThresholdNumber(utils.formatUnits(result, 0));
         }
@@ -301,16 +230,14 @@ const SetThresholdPage = () => {
 }
 
 const AddGuardianPage = () => {
-  const { address, connectToWallet, disconnectWallet, provider } = useContext(WalletContext);
+  const { address, contract, provider } = useContext(WalletContext);
   const [guardianCount, setGuardianCount] = useState(0);
   const [loading, setLoading] = useState(false);
   useEffect(() => {
     if (!!address && !!provider) {
-      const goal_contract = new Contract(GUARDIAN_CONTRACT, LSP11ABI, provider.getSigner(address));
-
-      goal_contract.getGuardians().then(
+      contract.getGuardians().then(
         (result: any[]) => {
-          console.log("here");
+          console.log("here, ", result);
           setGuardianCount(result.length);
         }
       ).catch(
@@ -323,14 +250,13 @@ const AddGuardianPage = () => {
 
   const addGuardians = async () => {
     if (!!address && !!provider) {
-      const goal_contract = new Contract(GUARDIAN_CONTRACT, LSP11ABI, provider.getSigner(address));
       let guardianInput = document.getElementById("guardianInput");
       let guardianAddress = ""
       if (guardianInput != null) {
         guardianAddress = (guardianInput as HTMLInputElement).value;
       }
       setLoading(true);
-      let tx = await goal_contract.addGuardian(guardianAddress);
+      let tx = await contract.addGuardian(guardianAddress);
       let receipt = await tx.wait();
     }
   }

@@ -5,6 +5,8 @@ import { sequence } from '0xsequence'
 import WalletConnect from '@walletconnect/web3-provider'
 import { useAtom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
+import LSP11ABI from '@/abis/LSP11BasicSocialRecovery.json'
+import { Contract } from 'ethers';
 
 const web3modalStorageKey = 'WEB3_CONNECT_CACHED_PROVIDER';
 
@@ -24,15 +26,14 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
   const [provider, setProvider] = useState<ethers.providers.Web3Provider | null>(null)
+  const [contract, setContract] = useState<Contract>();
 
-  // useEffect(() => {
-  //   const connectAsync = async () => {
-  //     await connectToWalletInternal();
-  //   }
-  //   if (web3Modal && web3Modal.cachedProvider) {
-  //     connectAsync()
-  //   }
-  // }, [web3Modal])
+  const setLsp11Contract = (contractAddress: string) => {
+    if (provider) {
+      const lsp11Contract = new Contract(contractAddress, LSP11ABI, provider.getSigner(address));
+      setContract(lsp11Contract);
+    }
+  }
 
   const setWalletAddress = async (provider: any) => {
     try {
@@ -119,9 +120,11 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       value={{
         address,
         balance,
+        contract,
         loading,
         provider,
         error,
+        setLsp11Contract,
         connectToWallet,
         disconnectWallet,
       }}
