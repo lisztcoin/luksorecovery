@@ -10,7 +10,7 @@ import { Close } from '@/components/icons/close';
 import { useDrawer } from '@/components/drawer-views/context';
 import { ChevronDown } from '@/components/icons/chevron-down';
 import { MenuItem } from '@/components/ui/collapsible-menu';
-import WalletConnect from '@/components/nft/wallet-connect';
+import WalletConnect from '@/components/connect/wallet-connect';
 
 import { menuItems } from './sidebar/_default';
 

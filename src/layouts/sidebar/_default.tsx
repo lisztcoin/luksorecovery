@@ -41,42 +41,7 @@ export const menuItems = [
     name: 'Recover Account',
     icon: <ProfileIcon />,
     href: routes.recoverAccount,
-  },
-  {
-    name: 'My Goals',
-    icon: <FarmIcon />,
-    href: routes.mygoals,
-  },
-  {
-    name: 'Support Others',
-    icon: <ExchangeIcon />,
-    href: routes.supportOthers,
-  },
-  {
-    name: 'Claim Milestone NFT',
-    icon: <PlusCircle />,
-    href: routes.claimNFT,
-  },
-  {
-    name: 'Buy Special NFT',
-    icon: <DiskIcon />,
-    href: routes.nftDetails,
-  },
-  {
-    name: 'My NFTs',
-    icon: <ProfileIcon />,
-    href: routes.mynfts,
-  },
-  {
-    name: 'Swap',
-    icon: <ProfileIcon />,
-    href: routes.swap,
-  },
-  {
-    name: 'Liquidity',
-    icon: <ProfileIcon />,
-    href: routes.liquidity,
-  },
+  }
 ];
 
 type SidebarProps = {

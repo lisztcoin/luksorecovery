@@ -237,7 +237,6 @@ const VotePage = () => {
 }
 
 const GuardianVotePage: NextPageWithLayout = () => {
-  const { address, connectToWallet, disconnectWallet, provider } = useContext(WalletContext);
   const [state, setState] = useAtom(voteAtom);
   const [menu, setMenu] = useState(guardianVoteMenu);
 

@@ -8,7 +8,7 @@ import { useIsMounted } from '@/lib/hooks/use-is-mounted';
 import { useDrawer } from '@/components/drawer-views/context';
 // import Sidebar from '@/layouts/dashboard/_sidebar';
 import Sidebar from '@/layouts/sidebar/_default';
-import WalletConnect from '@/components/nft/wallet-connect';
+import WalletConnect from '@/components/connect/wallet-connect';
 
 function NotificationButton() {
   return (
