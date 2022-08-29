@@ -21,71 +21,49 @@ const Homepage: NextPageWithLayout = () => {
           <motion.div
             whileTap={{ scale: 0.98 }}
             whileHover={{ scale: 1.015 }}
-            onClick={() => router.push(routes.proposals)}
-            className="flex cursor-pointer flex-col items-center justify-center rounded-lg bg-white p-6 text-center shadow-card transition-shadow duration-200 hover:shadow-large dark:bg-light-dark xs:col-span-2 sm:col-auto sm:row-span-2"
+            className="flex cursor-pointer flex-col rounded-lg bg-white p-6 text-center shadow-card transition-shadow duration-200 hover:shadow-large dark:bg-light-dark xs:col-span-2 sm:col-auto sm:row-span-2"
           >
-            <div className="h-auto w-16 xs:w-20 xl:w-24 3xl:w-28 4xl:w-auto">
-              <Image alt="Vote Pool" src={votePool} />
-            </div>
-            <h3 className="mt-6 mb-2 text-sm font-medium uppercase text-gray-800 dark:text-gray-100 sm:text-base 3xl:text-lg">
-              Connect wallet and Create a goal
+            <h3 className="text-left mt-6 mb-2 text-sm font-medium uppercase text-gray-800 dark:text-gray-100 sm:text-base 3xl:text-lg">
+              Step 1: Setup Recovery
             </h3>
-            <p className="leading-loose text-gray-600 dark:text-gray-400">
-              Earn coins from daily check ins and finally achieving the goal. No initial deposit required.
+            <p className="leading-loose text-gray-600 dark:text-gray-400 text-left">
+              You must still have access to your profile to do the social recovery setup. You also need to deploy a LSP 11 contract with your account as the owner and make the necessary permission changes before continuing the process on this website.
             </p>
-          </motion.div>
-          <motion.a
-            whileTap={{ scale: 0.98 }}
-            whileHover={{ scale: 1.015 }}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-lg bg-white p-6 shadow-card transition-shadow duration-200 hover:shadow-large dark:bg-light-dark"
-          >
-            <h3 className="mt-6 mb-2 text-sm font-medium uppercase text-gray-800 dark:text-gray-100 sm:text-base 3xl:text-lg">
-              Cheer on other people's goals
-            </h3>
-            <p className="leading-loose text-gray-600 dark:text-gray-400">
-              Earn extra coins by cheering on others and getting cheers for your goals.
-            </p>
-          </motion.a>
-          <motion.a
-            whileTap={{ scale: 0.98 }}
-            whileHover={{ scale: 1.015 }}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-lg bg-white p-6 shadow-card transition-shadow duration-200 hover:shadow-large dark:bg-light-dark"
-          >
-            <h3 className="mt-6 mb-2 text-sm font-medium uppercase text-gray-800 dark:text-gray-100 sm:text-base 3xl:text-lg">
-              Claim milestone NFTs
-            </h3>
-            <p className="leading-loose text-gray-600 dark:text-gray-400">
-              Claim cool milestone NFTs when you reach certain stages of your goal or finally achieve your goal.
-            </p>
-          </motion.a>
-          <motion.div
-            whileTap={{ scale: 0.98 }}
-            whileHover={{ scale: 1.015 }}
-            onClick={() => router.push('/')}
-            className="cursor-pointer rounded-lg bg-white p-6 shadow-card transition-shadow duration-200 hover:shadow-large dark:bg-light-dark"
-          >
-            <h3 className="mt-6 mb-2 text-sm font-medium uppercase text-gray-800 dark:text-gray-100 sm:text-base 3xl:text-lg">
-              Mint special NFTs
-            </h3>
-            <p className="leading-loose text-gray-600 dark:text-gray-400">
-              Use your hard-earned coins to mint special NFTs! The more coin you are willing to spend on mint, the better the NFTs will be!
+            <br />
+            <p className="leading-loose text-gray-600 dark:text-gray-400 text-left">
+              Follow the steps in the Setup Recovery section to finish the setup.
             </p>
           </motion.div>
           <motion.div
             whileTap={{ scale: 0.98 }}
             whileHover={{ scale: 1.015 }}
-            onClick={() => router.push('/')}
-            className="cursor-pointer rounded-lg bg-white p-6 shadow-card transition-shadow duration-200 hover:shadow-large dark:bg-light-dark"
+            className="flex cursor-pointer flex-col rounded-lg bg-white p-6 text-center shadow-card transition-shadow duration-200 hover:shadow-large dark:bg-light-dark xs:col-span-2 sm:col-auto sm:row-span-2"
           >
-            <h3 className="mt-6 mb-2 text-sm font-medium uppercase text-gray-800 dark:text-gray-100 sm:text-base 3xl:text-lg">
-              Showcase your NFTs
+            <h3 className="text-left mt-6 mb-2 text-sm font-medium uppercase text-gray-800 dark:text-gray-100 sm:text-base 3xl:text-lg">
+              Step 2: Vote as a Guardian
             </h3>
-            <p className="leading-loose text-gray-600 dark:text-gray-400">
-              Tell your friends you reached your goals and show your NFTs! You can view all NFTs here or on opensea.
+            <p className="leading-loose text-gray-600 dark:text-gray-400 text-left">
+              You've lost access to your profile?
+            </p>
+            <br />
+            <p className="leading-loose text-gray-600 dark:text-gray-400 text-left">
+              No worries. Ask the guardians you have set in the first step to use the website to vote your new profile as the owner of your old profile.
+            </p>
+          </motion.div>
+          <motion.div
+            whileTap={{ scale: 0.98 }}
+            whileHover={{ scale: 1.015 }}
+            className="flex cursor-pointer flex-col rounded-lg bg-white p-6 text-center shadow-card transition-shadow duration-200 hover:shadow-large dark:bg-light-dark xs:col-span-2 sm:col-auto sm:row-span-2"
+          >
+            <h3 className="text-left mt-6 mb-2 text-sm font-medium uppercase text-gray-800 dark:text-gray-100 sm:text-base 3xl:text-lg">
+              Step 3: Recover Account
+            </h3>
+            <p className="leading-loose text-gray-600 dark:text-gray-400 text-left">
+              It's time to celebrate to re-gain access to your profile!
+            </p>
+            <br />
+            <p className="leading-loose text-gray-600 dark:text-gray-400 text-left">
+              Login to your new profile that has gained enough vote from your guardians. Simply enter required information to claim your old profile! Cheers!
             </p>
           </motion.div>
         </div>
