@@ -17,7 +17,11 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import GuardianName from '@/components/ui/GuardianName'
 import { lsp11Bytecode } from '@/abis/LSP11Bytecode'
-
+import {
+  ERC725YKeys
+  // @ts-ignore
+} from '@lukso/lsp-smart-contracts/constants.js'
+import UniversalProfile from '@lukso/universalprofile-smart-contracts/artifacts/UniversalProfile.json'
 
 let deployContractMenu = [
   {
@@ -41,17 +45,31 @@ const DeployLSP11Page = () => {
       setStep(0);
 
       // First step - deploy contract
-      const factory = new ContractFactory(LSP11ABI, lsp11Bytecode, provider.getSigner(address))
-      const contract = await factory.deploy(address);
-      console.log(contract.address)
-      await contract.deployTransaction.wait();
+      // const factory = new ContractFactory(LSP11ABI, lsp11Bytecode, provider.getSigner(address))
+      // const contract = await factory.deploy(address);
+      // console.log(contract.address)
+      // await contract.deployTransaction.wait();
 
       // 0x6D2059c6C5A85FD956242776992FeE988AA062ca
       const contract_address = "0x6D2059c6C5A85FD956242776992FeE988AA062ca";
+      setStep(1);
+      const permissionKey =
+        ERC725YKeys['LSP6']['AddressPermissions:Permissions'] +
+        contract_address.slice(2)
+      console.log("key: ", permissionKey);
+      // ADD_PERMISSION + CHANGE_PERMISSION
+      const permissionValue = "0x0000000000000000000000000000000000000000000000000000000000000006"
 
+      const addressContract = new Contract(address, UniversalProfile.abi, provider.getSigner(address));
+      console.log(await addressContract.owner());
+      console.log(await addressContract.getData(["0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3"]));
+      console.log(addressContract);
+      console.log(provider.getSigner(address))
+      const tx = await addressContract.setData([permissionKey], [permissionValue]);
+      console.log(tx);
+      await tx.wait();
 
-
-
+      setStep(2)
 
       setLoading(false);
     } else {
@@ -71,7 +89,8 @@ const DeployLSP11Page = () => {
           <br />
           <p> ==> Deploy LSP contract. {step == 0 && "[processing...]"} {step > 0 && "[Done]"}</p>
           <p> ==> Setting permissions. {step == 1 && "[processing...]"} {step > 1 && "[Done]"}</p>
-          <p> ==> Linking contract to account. {step == 2 && "[processing...]"}</p>
+          <p> ==> Linking contract to account (part 1). {step == 2 && "[processing...]"} {step > 2 && "[Done]"}</p>
+          <p> ==> Linking contract to account (part 2). {step == 3 && "[processing...]"} {step > 3 && "[Done]"}</p>
         </div>
         <Button
           isLoading={loading}
