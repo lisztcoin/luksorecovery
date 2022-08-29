@@ -56,31 +56,6 @@
         "type": "function"
     },
     {
-        "inputs": [],
-        "name": "checkInterface",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "bytes32",
-                "name": "recoverProcessId",
-                "type": "bytes32"
-            },
-            {
-                "internalType": "string",
-                "name": "plainSecret",
-                "type": "string"
-            }
-        ],
-        "name": "checkRequirement",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
         "inputs": [
             {
                 "internalType": "bytes32",
@@ -194,13 +169,6 @@
             }
         ],
         "name": "recoverOwnership",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "recoverOwnershipWithCheck",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

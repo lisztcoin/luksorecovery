@@ -6,7 +6,10 @@ built by lisztcoin@, specifically for Lukso BUILD IT hackathon.
 
 [TRY IT LIVE ON VERCEL](...)
 
-(please connect to Polygon Mumbai testnet. Gas is required to perform actions)
+UP extension is required for using the functionalities of the website.
+
+This website will help you setup social recovery if you have LSP11 contract associated to your profile and eventually allow you to use your new profile to be the owner of your old profile.
+
 
 -----------
 
@@ -16,4 +19,6 @@ Bla Bla Bla
 
 ------------
 
-fwejiofjwoif
+Important Note
+
+* 

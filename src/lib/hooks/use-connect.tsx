@@ -54,13 +54,13 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
           // We can still use LSP11ABI as we will only call supportInterface which is supported by all contracts
           try {
             const address_permission_contract = new Contract(addressPermissionsValue, LSP11ABI, provider.getSigner(address));
-            console.log(addressPermissionsValue);
+            // console.log(addressPermissionsValue);
             if (await address_permission_contract.supportsInterface('0xcb81043b')) {
               await setContract(address_permission_contract);
               isContractSet = true;
             }
           } catch (error) {
-            console.log(error);
+            // console.log(error);
           }
         }
       }

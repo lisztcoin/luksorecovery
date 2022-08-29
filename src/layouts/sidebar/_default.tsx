@@ -28,6 +28,11 @@ export const menuItems = [
     href: routes.home,
   },
   {
+    name: 'Deploy LSP11 Contract',
+    icon: <ProfileIcon />,
+    href: routes.deployContract,
+  },
+  {
     name: 'Setup Recovery',
     icon: <ProfileIcon />,
     href: routes.setupRecovery,

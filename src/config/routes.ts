@@ -1,5 +1,6 @@
 const routes = {
   home: '/',
+  deployContract: '/deploy-contract',
   setupRecovery: '/setup-recovery',
   guardianVote: '/guardian-vote',
   recoverAccount: '/recover-account',
