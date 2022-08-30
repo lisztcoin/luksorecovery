@@ -15,7 +15,6 @@ import { ERC725, ERC725JSONSchema } from '@erc725/erc725.js';
 import Web3 from 'web3'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import GuardianName from '@/components/ui/GuardianName'
 import { lsp11Bytecode } from '@/abis/LSP11Bytecode'
 import {
   ERC725YKeys
@@ -42,6 +41,7 @@ const DeployLSP11Page = () => {
   const { address, web3, contract, setLsp11Contract, provider } = useContext(WalletContext);
   const [lsp11ContractAddress, setLsp11ContractAddress] = useState<string>();
   useEffect(() => {
+    setLoading(true);
     if (step == 0) {
       console.log('deploying contract');
 
@@ -126,6 +126,7 @@ const DeployLSP11Page = () => {
           console.log('payload: ', JSON.stringify(payload, null, 2))
         });
     }
+    setLoading(false);
   }, [step])
 
   const handleDeployContract = async () => {

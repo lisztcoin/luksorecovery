@@ -36,7 +36,7 @@ const recoverAccountMenu = [
 ];
 
 const AccountPage = () => {
-  let { address, contract, setLsp11Contract, provider } = useContext(WalletContext);
+  let { address, contract, setLsp11Contract, web3 } = useContext(WalletContext);
   const [state, setState] = useAtom(recoverAtom);
   const [loading, setLoading] = useState(false);
 
@@ -47,7 +47,7 @@ const AccountPage = () => {
   }
 
   const setAccount = async () => {
-    if (!!address && !!provider) {
+    if (!!address && !!web3) {
       let accountInput = document.getElementById("accountInput");
       let account = ""
       if (accountInput != null) {
