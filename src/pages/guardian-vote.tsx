@@ -37,17 +37,18 @@ const guardianVoteMenu = [
 ];
 
 const AccountPage = () => {
-  let { address, contract, setLsp11Contract, provider } = useContext(WalletContext);
+  let { address, contract, setLsp11Contract, web3 } = useContext(WalletContext);
   const [state, setState] = useAtom(voteAtom);
   const [loading, setLoading] = useState(false);
+  const [targetAccount, setTargetAccount] = useState<string>()
 
   useEffect(() => {
     const isGuardian = async () => {
       let result = false;
       // wait for the contract variable to be updated.
-      if (contract) {
+      if (contract && address && web3 && targetAccount) {
         console.log('contract not null!')
-        result = await contract.isGuardian(address)
+        result = await contract.methods.isGuardian(address).call({ from: address });
         if (!result) {
           toast("You are not a guardian to this profile!", {
             position: toast.POSITION.TOP_CENTER,
@@ -58,24 +59,25 @@ const AccountPage = () => {
           setState({ ...state, account: address, step: newStep, unlockedStep: state.unlockedStep < newStep ? newStep : state.unlockedStep });
         }
       }
+      setLoading(false);
     }
     isGuardian();
-  }, [contract])
+  }, [contract, address, targetAccount])
 
   const handleSetAccount = async () => {
     setLoading(true);
     await setAccount();
-    setLoading(false);
   }
 
   const setAccount = async () => {
-    if (!!address && !!provider) {
+    if (!!address && !!web3) {
       let accountInput = document.getElementById("accountInput");
       let account = ""
       if (accountInput != null) {
         account = (accountInput as HTMLInputElement).value;
       }
       const success = await setLsp11Contract(account);
+      setTargetAccount(account);
       // update Contract to reflect the new state.
       if (!success) {
         toast("This profile does not support LSP11!", {
@@ -118,7 +120,7 @@ const AccountPage = () => {
 
 const NamePage = () => {
 
-  const { address, contract, provider } = useContext(WalletContext);
+  const { address, contract, web3 } = useContext(WalletContext);
   const [state, setState] = useAtom(voteAtom);
   const [process, setProcess] = useState<any[]>([]);
 
@@ -133,14 +135,18 @@ const NamePage = () => {
   }
 
   useEffect(() => {
-    if (!!address && !!provider) {
-      contract.getRecoverProcessesIds().then(
-        (result: any[]) => {
+    if (!!address && !!web3) {
+      contract.methods.getRecoverProcessesIds().call({ from: address }).then(
+        (result: any) => {
           setProcess(result);
+        }
+      ).catch(
+        (reason: any) => {
+          console.log(reason.message);
         }
       );
     }
-  }, [address, provider]);
+  }, [address, web3]);
 
   return (
     <>
@@ -176,27 +182,44 @@ const NamePage = () => {
 }
 
 const VotePage = () => {
-  const { address, contract, provider } = useContext(WalletContext);
+  const { address, contract, web3 } = useContext(WalletContext);
   const [state, setState] = useAtom(voteAtom);
   const [loading, setLoading] = useState(false);
 
   const castVote = async () => {
-    if (!!address && !!provider) {
+    if (!!address && !!web3) {
       let newOwnerInput = document.getElementById("newOwnerInput");
       let newOwner = ""
       if (newOwnerInput != null) {
         newOwner = (newOwnerInput as HTMLInputElement).value;
       }
       try {
-        let tx = await contract.voteToRecover(utils.formatBytes32String(state.processName), newOwner);
-        let receipt = await tx.wait();
-        toast("Success!", {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        contract.methods.voteToRecover(utils.formatBytes32String(state.processName), newOwner)
+          .send({
+            from: address,
+          }).on('receipt', function (receipt: any) {
+            console.log('receipt: ', receipt)
+            toast("Success!", {
+              position: toast.POSITION.TOP_CENTER,
+            });
+            setLoading(false);
+          })
+          .once('sending', (payload: any) => {
+            console.log('payload: ', JSON.stringify(payload, null, 2))
+          })
+          .catch((error: any) => {
+            console.log(error);
+            toast(error.message, {
+              position: toast.POSITION.TOP_CENTER,
+            });
+            setLoading(false);
+          });
+
       } catch {
         toast("Failed to cast your vote!", {
           position: toast.POSITION.TOP_CENTER,
         });
+        setLoading(false);
       }
     } else {
       toast("Please connect to your wallet!", {
@@ -208,7 +231,6 @@ const VotePage = () => {
   const handleCastVote = async () => {
     setLoading(true);
     await castVote();
-    setLoading(false);
   }
   return (
     <>
@@ -225,7 +247,7 @@ const VotePage = () => {
           size="large"
           shape="rounded"
           fullWidth={true}
-          onClick={fhandleCastVote}
+          onClick={handleCastVote}
           className="mt-6 uppercase xs:mt-8 xs:tracking-widest"
         >
           Confirm
