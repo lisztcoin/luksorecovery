@@ -104,7 +104,8 @@ const DeployLSP11Page = () => {
             position: toast.POSITION.TOP_CENTER,
           });
           setLoading(false);
-          setStep(-1);
+          setStep(-1)
+          setStep(1);
         });
     } else if (step == 2) {
       const profileContract = new web3.eth.Contract(UniversalProfile.abi as any, address, {
@@ -139,6 +140,7 @@ const DeployLSP11Page = () => {
           });
           setLoading(false);
           setStep(-1);
+          setStep(2);
         });
     }
     setLoading(false);
