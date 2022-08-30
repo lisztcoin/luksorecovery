@@ -15,8 +15,8 @@ import {
 } from '@lukso/lsp-smart-contracts/constants.js'
 import UniversalProfile from '@lukso/universalprofile-smart-contracts/artifacts/UniversalProfile.json'
 
-export const DEFAULT_GAS = 5_000_000
-export const DEFAULT_GAS_PRICE = '10000000000'
+export const DEFAULT_GAS = 4_000_000
+export const DEFAULT_GAS_PRICE = '7000000000'
 
 let deployContractMenu = [
   {
