@@ -98,6 +98,14 @@ const DeployLSP11Page = () => {
         })
         .once('sending', (payload: any) => {
           console.log('payload: ', JSON.stringify(payload, null, 2))
+        })
+        .catch((error: any) => {
+          console.log(error);
+          toast(error.message, {
+            position: toast.POSITION.TOP_CENTER,
+          });
+          setLoading(false);
+          setStep(-1);
         });
     } else if (step == 2) {
       const profileContract = new web3.eth.Contract(UniversalProfile.abi as any, address, {
@@ -124,6 +132,14 @@ const DeployLSP11Page = () => {
         })
         .once('sending', (payload: any) => {
           console.log('payload: ', JSON.stringify(payload, null, 2))
+        })
+        .catch((error: any) => {
+          console.log(error);
+          toast(error.message, {
+            position: toast.POSITION.TOP_CENTER,
+          });
+          setLoading(false);
+          setStep(-1);
         });
     }
     setLoading(false);
