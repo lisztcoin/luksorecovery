@@ -154,7 +154,6 @@ const RecoverPage = () => {
 
   const handleRecover = async () => {
     await recover();
-    setLoading(false);
   }
 
   return (
