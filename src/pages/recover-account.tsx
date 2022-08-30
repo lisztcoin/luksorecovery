@@ -99,11 +99,11 @@ const AccountPage = () => {
 }
 
 const RecoverPage = () => {
-  const { address, contract, provider } = useContext(WalletContext);
+  const { address, contract, web3 } = useContext(WalletContext);
   const [loading, setLoading] = useState(false);
 
   const recover = async () => {
-    if (!!address && !!provider) {
+    if (!!address && !!web3) {
       let newHashInput = document.getElementById("newHashInput");
       let newHash = ""
       if (newHashInput != null) {
@@ -122,15 +122,24 @@ const RecoverPage = () => {
       setLoading(true);
       const hashedNewSecret = utils.keccak256(utils.toUtf8Bytes(newHash));
       try {
-        let tx = await contract.recoverOwnership(utils.formatBytes32String(recoveryProcess), secret, hashedNewSecret);
-        let receipt = await tx.wait();
-        toast("Success!", {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        let tx = await contract.recoverOwnership(utils.formatBytes32String(recoveryProcess), secret, hashedNewSecret)
+          .send({
+            from: address,
+          }).on('receipt', function (receipt: any) {
+            console.log('receipt: ', receipt)
+            toast("Success!", {
+              position: toast.POSITION.TOP_CENTER,
+            });
+            setLoading(false);
+          })
+          .once('sending', (payload: any) => {
+            console.log('payload: ', JSON.stringify(payload, null, 2))
+          });
       } catch {
         toast("Recover error! Please make sure you entered the correct process name and secret.", {
           position: toast.POSITION.TOP_CENTER,
         });
+        setLoading(false);
       }
     }
   }

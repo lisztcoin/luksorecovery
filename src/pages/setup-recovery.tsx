@@ -323,7 +323,7 @@ const SecretPage = () => {
       try {
         const hashedSecret = utils.keccak256(utils.toUtf8Bytes(secret));
         console.log(hashedSecret);
-        const tx = await contract.methods.setSecret(hashedSecret).send({ from: address })
+        contract.methods.setSecret(hashedSecret).send({ from: address })
           .on('receipt', function (receipt: any) {
             console.log('receipt: ', receipt)
             toast("Success! Please go to the Setup Recovery tab to continue the process!", {
