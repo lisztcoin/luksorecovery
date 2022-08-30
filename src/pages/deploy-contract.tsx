@@ -3,16 +3,9 @@ import type { NextPageWithLayout } from '@/types';
 import cn from 'classnames';
 import Button from '@/components/ui/button';
 import DashboardLayout from '@/layouts/_dashboard';
-import Trade from '@/components/ui/trade';
 import { useContext } from 'react';
 import { WalletContext } from '@/lib/hooks/use-connect';
-import { Contract, BigNumber, utils, ContractFactory } from 'ethers';
-import LSP11ABI from '@/abis/LSP11BasicSocialRecovery.json'
 import CarouselMenu from '@/components/ui/carousel-menu';
-import { setupRecoveryAtom } from '@/store/store';
-import { useAtom } from 'jotai';
-import { ERC725, ERC725JSONSchema } from '@erc725/erc725.js';
-import Web3 from 'web3'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { lsp11Bytecode } from '@/abis/LSP11Bytecode'
@@ -35,7 +28,6 @@ let deployContractMenu = [
 ];
 
 const DeployLSP11Page = () => {
-  const [setupRecoveryState, setSetupRecoveryState] = useAtom(setupRecoveryAtom);
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(-1);
   const { address, web3, contract, setLsp11Contract, provider } = useContext(WalletContext);

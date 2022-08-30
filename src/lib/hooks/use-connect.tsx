@@ -39,7 +39,13 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         let w3 = new Web3(window.ethereum)
         setWeb3(w3)
 
-      }).catch((err: any) => console.log(err))
+      }).catch((err: any) => {
+        console.log(err);
+        setConnectWalletCalled(false);
+      }
+      )
+    } else {
+      setConnectWalletCalled(false);
     }
   }, [connectWalletCalled])
 

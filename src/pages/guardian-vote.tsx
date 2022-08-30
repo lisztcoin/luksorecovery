@@ -6,8 +6,6 @@ import DashboardLayout from '@/layouts/_dashboard';
 import { useContext } from 'react';
 import { WalletContext } from '@/lib/hooks/use-connect';
 import { Contract, BigNumber, utils } from 'ethers';
-import { GUARDIAN_CONTRACT } from '@/config/constants';
-import LSP11ABI from '@/abis/LSP11BasicSocialRecovery.json'
 import CarouselMenu from '@/components/ui/carousel-menu';
 import { voteAtom } from '@/store/store';
 import ProcessInfo from '@/components/ui/process-info';
