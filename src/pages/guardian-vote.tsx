@@ -40,12 +40,13 @@ const AccountPage = () => {
   let { address, contract, setLsp11Contract, web3 } = useContext(WalletContext);
   const [state, setState] = useAtom(voteAtom);
   const [loading, setLoading] = useState(false);
+  const [targetAccount, setTargetAccount] = useState<string>()
 
   useEffect(() => {
     const isGuardian = async () => {
       let result = false;
       // wait for the contract variable to be updated.
-      if (contract) {
+      if (contract && address && web3 && targetAccount) {
         console.log('contract not null!')
         result = await contract.methods.isGuardian(address).call({ from: address });
         if (!result) {
@@ -61,7 +62,7 @@ const AccountPage = () => {
       setLoading(false);
     }
     isGuardian();
-  }, [contract])
+  }, [contract, address, targetAccount])
 
   const handleSetAccount = async () => {
     setLoading(true);
@@ -76,6 +77,7 @@ const AccountPage = () => {
         account = (accountInput as HTMLInputElement).value;
       }
       const success = await setLsp11Contract(account);
+      setTargetAccount(account);
       // update Contract to reflect the new state.
       if (!success) {
         toast("This profile does not support LSP11!", {
@@ -180,19 +182,19 @@ const NamePage = () => {
 }
 
 const VotePage = () => {
-  const { address, contract, provider } = useContext(WalletContext);
+  const { address, contract, web3 } = useContext(WalletContext);
   const [state, setState] = useAtom(voteAtom);
   const [loading, setLoading] = useState(false);
 
   const castVote = async () => {
-    if (!!address && !!provider) {
+    if (!!address && !!web3) {
       let newOwnerInput = document.getElementById("newOwnerInput");
       let newOwner = ""
       if (newOwnerInput != null) {
         newOwner = (newOwnerInput as HTMLInputElement).value;
       }
       try {
-        let tx = await contract.methods.voteToRecover(utils.formatBytes32String(state.processName), newOwner)
+        contract.methods.voteToRecover(utils.formatBytes32String(state.processName), newOwner)
           .send({
             from: address,
           }).on('receipt', function (receipt: any) {
@@ -204,6 +206,13 @@ const VotePage = () => {
           })
           .once('sending', (payload: any) => {
             console.log('payload: ', JSON.stringify(payload, null, 2))
+          })
+          .catch((error: any) => {
+            console.log(error);
+            toast(error.message, {
+              position: toast.POSITION.TOP_CENTER,
+            });
+            setLoading(false);
           });
 
       } catch {

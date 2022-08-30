@@ -138,6 +138,13 @@ const SetThresholdPage = () => {
         })
           .once('sending', (payload: any) => {
             console.log('payload: ', JSON.stringify(payload, null, 2))
+          })
+          .catch((error: any) => {
+            console.log(error);
+            toast(error.message, {
+              position: toast.POSITION.TOP_CENTER,
+            });
+            setLoading(false);
           });
       } catch {
         toast("Failed to set threshold!", {
@@ -241,6 +248,13 @@ const AddGuardianPage = () => {
           })
           .once('sending', (payload: any) => {
             console.log('payload: ', JSON.stringify(payload, null, 2))
+          })
+          .catch((error: any) => {
+            console.log(error);
+            toast(error.message, {
+              position: toast.POSITION.TOP_CENTER,
+            });
+            setLoading(false);
           });
       } catch {
         toast("Failed to add guardian!", {
@@ -311,10 +325,10 @@ const AddGuardianPage = () => {
 
 const SecretPage = () => {
 
-  const { address, contract, provider } = useContext(WalletContext);
+  const { address, contract, web3 } = useContext(WalletContext);
   const [loading, setLoading] = useState(false);
   const setSecret = async () => {
-    if (!!address && !!provider) {
+    if (!!address && !!web3) {
       let secretInput = document.getElementById("secretInput");
       let secret = ""
       if (secretInput != null) {
@@ -330,13 +344,18 @@ const SecretPage = () => {
               position: toast.POSITION.TOP_CENTER,
             });
             setLoading(false);
-            toast("Success! Your profile can now be recovered through guardians!", {
-              position: toast.POSITION.TOP_CENTER,
-            });
           })
           .once('sending', (payload: any) => {
             console.log('payload: ', JSON.stringify(payload, null, 2))
-          });
+          })
+          .catch((error: any) => {
+            console.log(error);
+            toast(error.message, {
+              position: toast.POSITION.TOP_CENTER,
+            });
+            setLoading(false);
+          })
+          ;
       } catch {
         toast("Failed to set secret!", {
           position: toast.POSITION.TOP_CENTER,
@@ -349,7 +368,6 @@ const SecretPage = () => {
   const handleSetSecret = async () => {
     setLoading(true);
     await setSecret();
-    setLoading(false);
   }
 
   return (

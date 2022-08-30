@@ -122,7 +122,7 @@ const RecoverPage = () => {
       setLoading(true);
       const hashedNewSecret = utils.keccak256(utils.toUtf8Bytes(newHash));
       try {
-        let tx = await contract.recoverOwnership(utils.formatBytes32String(recoveryProcess), secret, hashedNewSecret)
+        contract.methods.recoverOwnership(utils.formatBytes32String(recoveryProcess), secret, hashedNewSecret)
           .send({
             from: address,
           }).on('receipt', function (receipt: any) {
@@ -134,11 +134,19 @@ const RecoverPage = () => {
           })
           .once('sending', (payload: any) => {
             console.log('payload: ', JSON.stringify(payload, null, 2))
+          })
+          .catch((error: any) => {
+            console.log(error);
+            toast(error.message, {
+              position: toast.POSITION.TOP_CENTER,
+            });
+            setLoading(false);
           });
-      } catch {
+      } catch (error) {
         toast("Recover error! Please make sure you entered the correct process name and secret.", {
           position: toast.POSITION.TOP_CENTER,
         });
+        console.log(error);
         setLoading(false);
       }
     }
@@ -205,7 +213,7 @@ const RecoverAccountPage: NextPageWithLayout = () => {
 
   return (
     <>
-      <CarouselMenu carouselMenu={recoverAccountMenu}>
+      <CarouselMenu carouselMenu={menu}>
         {(state.step == 0 && (<AccountPage />)) ||
           (state.step == 1 && (<RecoverPage />))}
       </CarouselMenu>
