@@ -50,7 +50,14 @@ const DeployLSP11Page = () => {
         console.log('Deployed Contract Address : ', newContractInstance.options.address);
         setLsp11ContractAddress(newContractInstance.options.address);
         setStep(1);
-      })
+      }).catch((error: any) => {
+        console.log(error);
+        toast(error.message, {
+          position: toast.POSITION.TOP_CENTER,
+        });
+        setLoading(false);
+        setStep(-1);
+      });
     } else if (step == 1) {
       console.log('linking newly deployed contract to profile');
       if (!lsp11ContractAddress) {
