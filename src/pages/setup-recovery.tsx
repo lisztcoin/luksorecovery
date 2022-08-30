@@ -48,11 +48,11 @@ let setupRecoveryMenu = [
 const InitializePage = () => {
   const [setupRecoveryState, setSetupRecoveryState] = useAtom(setupRecoveryAtom);
   const [loading, setLoading] = useState(false);
-  const { address, provider, contract, setLsp11Contract } = useContext(WalletContext);
+  const { address, web3, contract, setLsp11Contract } = useContext(WalletContext);
 
   const handleInitialize = async () => {
 
-    if (!!address && !!provider) {
+    if (!!address && !!web3) {
       setLoading(true);
       const success = await setLsp11Contract(address);
       setLoading(false);
@@ -95,14 +95,16 @@ const InitializePage = () => {
 }
 
 const SetThresholdPage = () => {
-  const { address, contract, provider } = useContext(WalletContext);
+  const { address, contract, web3 } = useContext(WalletContext);
   const [thresholdNumber, setThresholdNumber] = useState("0");
   const [loading, setLoading] = useState(false);
   const [state, setState] = useAtom(setupRecoveryAtom);
 
   useEffect(() => {
-    if (!!address && !!provider) {
-      contract.getGuardiansThreshold().then(
+    if (!!address && !!web3 && !!contract) {
+      contract.methods.getGuardiansThreshold().call(
+        { from: address }
+      ).then(
         (result: any) => {
           setThresholdNumber(utils.formatUnits(result, 0));
         }
@@ -112,10 +114,10 @@ const SetThresholdPage = () => {
         }
       );
     }
-  }, [address, provider]);
+  }, [address, web3]);
 
   const setThreshold = async () => {
-    if (!!address && !!provider) {
+    if (!!address && !!web3) {
       setLoading(true);
       let thresholdInput = document.getElementById("thresholdInput");
       let threshold = ""
@@ -123,12 +125,32 @@ const SetThresholdPage = () => {
         threshold = (thresholdInput as HTMLInputElement).value;
       }
       try {
-        let tx = await contract.setThreshold(parseInt(threshold));
-        let receipt = await tx.wait();
+        contract.methods.setThreshold(parseInt(threshold)).send({
+          from: address,
+        }).on('receipt', function (receipt: any) {
+          console.log('receipt: ', receipt)
+          toast("Success! Please go to the Setup Recovery tab to continue the process!", {
+            position: toast.POSITION.TOP_CENTER,
+          });
+          setLoading(false);
+          const newStep = state.step + 1;
+          setState({ ...state, step: newStep, unlockedStep: state.unlockedStep < newStep ? newStep : state.unlockedStep })
+        })
+          .once('sending', (payload: any) => {
+            console.log('payload: ', JSON.stringify(payload, null, 2))
+          })
+          .catch((error: any) => {
+            console.log(error);
+            toast(error.message, {
+              position: toast.POSITION.TOP_CENTER,
+            });
+            setLoading(false);
+          });
       } catch {
         toast("Failed to set threshold!", {
           position: toast.POSITION.TOP_CENTER,
         });
+        setLoading(false);
       }
     } else {
       toast("Please connect to your wallet!", {
@@ -139,9 +161,6 @@ const SetThresholdPage = () => {
 
   const handleSetThreshold = async () => {
     await setThreshold();
-    setLoading(false);
-    const newStep = state.step + 1;
-    setState({ ...state, step: newStep, unlockedStep: state.unlockedStep < newStep ? newStep : state.unlockedStep })
   }
 
   const skipSetThreshold = () => {
@@ -180,7 +199,7 @@ const SetThresholdPage = () => {
             onClick={skipSetThreshold}
             className="mt-2 uppercase xs:mt-4 xs:tracking-widest"
           >
-            Skip Add Guardian
+            Skip Set Threshold
           </Button>
         )}
       </div>
@@ -189,12 +208,14 @@ const SetThresholdPage = () => {
 }
 
 const AddGuardianPage = () => {
-  const { address, contract, provider } = useContext(WalletContext);
-  const [guardians, setGuardians] = useState([]);
+  const { address, contract, web3 } = useContext(WalletContext);
+  const [guardians, setGuardians] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   useEffect(() => {
-    if (!!address && !!provider) {
-      contract.getGuardians().then(
+    if (!!address && !!web3) {
+      contract.methods.getGuardians().call(
+        { from: address }
+      ).then(
         (result: any[]) => {
           setGuardians(result);
         }
@@ -207,7 +228,7 @@ const AddGuardianPage = () => {
   });
 
   const addGuardians = async () => {
-    if (!!address && !!provider) {
+    if (!!address && !!web3) {
       let guardianInput = document.getElementById("guardianInput");
       let guardianAddress = ""
       if (guardianInput != null) {
@@ -215,12 +236,31 @@ const AddGuardianPage = () => {
       }
       setLoading(true);
       try {
-        let tx = await contract.addGuardian(guardianAddress);
-        let receipt = await tx.wait();
+        contract.methods.addGuardian(guardianAddress).send({ from: address })
+          .on('receipt', function (receipt: any) {
+            console.log('receipt: ', receipt)
+            toast("Success! Please go to the Setup Recovery tab to continue the process!", {
+              position: toast.POSITION.TOP_CENTER,
+            });
+            setLoading(false);
+            const newStep = state.step + 1;
+            setState({ ...state, step: newStep, unlockedStep: state.unlockedStep < newStep ? newStep : state.unlockedStep })
+          })
+          .once('sending', (payload: any) => {
+            console.log('payload: ', JSON.stringify(payload, null, 2))
+          })
+          .catch((error: any) => {
+            console.log(error);
+            toast(error.message, {
+              position: toast.POSITION.TOP_CENTER,
+            });
+            setLoading(false);
+          });
       } catch {
         toast("Failed to add guardian!", {
           position: toast.POSITION.TOP_CENTER,
         });
+        setLoading(false);
       }
     } else {
       toast("Please connect to your wallet!", {
@@ -232,9 +272,6 @@ const AddGuardianPage = () => {
   const [state, setState] = useAtom(setupRecoveryAtom);
   const handleAddGuardian = async () => {
     await addGuardians();
-    setLoading(false);
-    const newStep = state.step + 1;
-    setState({ ...state, step: newStep, unlockedStep: state.unlockedStep < newStep ? newStep : state.unlockedStep })
   }
 
   const skipAddGuardian = () => {
@@ -288,10 +325,10 @@ const AddGuardianPage = () => {
 
 const SecretPage = () => {
 
-  const { address, contract, provider } = useContext(WalletContext);
+  const { address, contract, web3 } = useContext(WalletContext);
   const [loading, setLoading] = useState(false);
   const setSecret = async () => {
-    if (!!address && !!provider) {
+    if (!!address && !!web3) {
       let secretInput = document.getElementById("secretInput");
       let secret = ""
       if (secretInput != null) {
@@ -300,15 +337,30 @@ const SecretPage = () => {
       try {
         const hashedSecret = utils.keccak256(utils.toUtf8Bytes(secret));
         console.log(hashedSecret);
-        const tx = await contract.setSecret(hashedSecret);
-        let receipt = await tx.wait();
-        toast("Success! Your profile can now be recovered through guardians!", {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        contract.methods.setSecret(hashedSecret).send({ from: address })
+          .on('receipt', function (receipt: any) {
+            console.log('receipt: ', receipt)
+            toast("Success! Please go to the Setup Recovery tab to continue the process!", {
+              position: toast.POSITION.TOP_CENTER,
+            });
+            setLoading(false);
+          })
+          .once('sending', (payload: any) => {
+            console.log('payload: ', JSON.stringify(payload, null, 2))
+          })
+          .catch((error: any) => {
+            console.log(error);
+            toast(error.message, {
+              position: toast.POSITION.TOP_CENTER,
+            });
+            setLoading(false);
+          })
+          ;
       } catch {
         toast("Failed to set secret!", {
           position: toast.POSITION.TOP_CENTER,
         });
+        setLoading(false);
       }
     }
   }
@@ -316,7 +368,6 @@ const SecretPage = () => {
   const handleSetSecret = async () => {
     setLoading(true);
     await setSecret();
-    setLoading(false);
   }
 
   return (

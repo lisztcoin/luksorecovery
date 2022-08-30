@@ -27,7 +27,7 @@ const Homepage: NextPageWithLayout = () => {
               Step 1: Setup Recovery
             </h3>
             <p className="leading-loose text-gray-600 dark:text-gray-400 text-left">
-              You must still have access to your profile to do the social recovery setup. You also need to deploy a LSP 11 contract with your account as the owner and make the necessary permission changes (<b><a href='https://github.com/lisztcoin/luksorecovery'>Click to see instructions</a></b>) before continuing the process on this website.
+              You must still have access to your profile to do the social recovery setup. Go to "Deploy LSP 11 Contract" for deploying a LSP 11 contract to your account.
             </p>
             <br />
             <p className="leading-loose text-gray-600 dark:text-gray-400 text-left">
