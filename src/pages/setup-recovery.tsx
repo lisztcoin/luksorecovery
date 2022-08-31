@@ -269,9 +269,55 @@ const AddGuardianPage = () => {
     }
   }
 
+  const removeGuardian = async () => {
+    if (!!address && !!web3) {
+      let guardianInput = document.getElementById("guardianInput");
+      let guardianAddress = ""
+      if (guardianInput != null) {
+        guardianAddress = (guardianInput as HTMLInputElement).value;
+      }
+      setLoading(true);
+      try {
+        contract.methods.removeGuardian(guardianAddress).send({ from: address })
+          .on('receipt', function (receipt: any) {
+            console.log('receipt: ', receipt)
+            toast("Success! Please go to the Setup Recovery tab to continue the process!", {
+              position: toast.POSITION.TOP_CENTER,
+            });
+            setLoading(false);
+            const newStep = state.step + 1;
+            setState({ ...state, step: newStep, unlockedStep: state.unlockedStep < newStep ? newStep : state.unlockedStep })
+          })
+          .once('sending', (payload: any) => {
+            console.log('payload: ', JSON.stringify(payload, null, 2))
+          })
+          .catch((error: any) => {
+            console.log(error);
+            toast(error.message, {
+              position: toast.POSITION.TOP_CENTER,
+            });
+            setLoading(false);
+          });
+      } catch {
+        toast("Failed to remove guardian!", {
+          position: toast.POSITION.TOP_CENTER,
+        });
+        setLoading(false);
+      }
+    } else {
+      toast("Please connect to your wallet!", {
+        position: toast.POSITION.TOP_CENTER,
+      });
+    }
+  }
+
   const [state, setState] = useAtom(setupRecoveryAtom);
   const handleAddGuardian = async () => {
     await addGuardians();
+  }
+
+  const handleRemoveGuardian = async () => {
+    await removeGuardian();
   }
 
   const skipAddGuardian = () => {
@@ -306,6 +352,16 @@ const AddGuardianPage = () => {
         >
           Add Guardian
         </Button>
+        <Button
+          isLoading={loading}
+          size="large"
+          shape="rounded"
+          fullWidth={true}
+          onClick={handleRemoveGuardian}
+          className="mt-2 uppercase xs:mt-4 xs:tracking-widest"
+        >
+          Remove Guardian
+        </Button>
         {guardians.length > 0 && (
           <Button
             size="large"
@@ -314,7 +370,7 @@ const AddGuardianPage = () => {
             onClick={skipAddGuardian}
             className="mt-2 uppercase xs:mt-4 xs:tracking-widest"
           >
-            Skip Add Guardian
+            Skip This Step
           </Button>
         )}
       </div>

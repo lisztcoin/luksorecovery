@@ -15,9 +15,9 @@ Angel is a robust and user friendly social recovery tool built for the Lukso eco
 Its functionalities include:
 
 * Deploy LSP 11 contract and configure it for the user with just one click.
-* Easy guardian, threshold and secret setup.
+* Easy guardian, threshold and secret setup. Add or Remove guardian.
 * Vote for new owner as a guardian. Multiple recovery process can co-exist so a guardian can vote multiple people if necessary.
-* Reclaim ownership
+* Reclaim ownership.
 * Robust error check and clear error messages for all possible error scenarios. (e.g. No LSP 11 contract deployed, wrong secret, wrong threshold, etc.)
 
 ------------
@@ -33,7 +33,6 @@ Important Code Pointers:
 
 I believe the social recovery tool will be very useful as it solves the major wallet management painpoint. Therefore I'd like to continue to work on it after hackathon, with below plans:
 
-* Guardian management. Add guardian removal capability.
 * More advanced threshold mechanism to mitigate risks posed by malicious guardians.
 * 
 
