@@ -1,6 +1,6 @@
 # Angel - The Social Recovery Tool for Lukso UP
 
-built by lisztcoin@, specifically for Lukso BUILD IT hackathon.
+built by lisztcoin@ (Kevin Yan, lisztcoin@gmail.com), specifically for Lukso BUILD IT hackathon.
 
 [View One Shot Demo on Youtube](https://www.youtube.com/watch?v=QO6JIqxG8SU)
 
